@@ -19,6 +19,11 @@
     return ref;
   }
 
+  function finiteNumber(value, fallback = 0) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
   /**
    * Evalúa la configuración técnica de un diseño de nave.
    * 
@@ -182,123 +187,79 @@
 
 
     const estado = estadoMision || window.estadoMision || {};
-    const diseno = (estado.diseno) ? estado.diseno : estado;
-    const evaluacion = estado.evaluacionActual || evaluarDiseno(diseno, estado.presupuestoMax || 500);
-    const objetivo = estado.objetivo || 'agua';
-    const presupuestoMax = estado.presupuestoMax || 500;
+    const diseno = estado.diseno || estado;
+    const presupuestoMax = Math.max(0, finiteNumber(estado.presupuestoMax, 500));
+    const evaluacion = estado.evaluacionActual || evaluarDiseno(diseno, presupuestoMax || 500);
+    const objetivo = ['agua', 'mapeo', 'economica'].includes(estado.objetivo) ? estado.objetivo : 'agua';
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, finiteNumber(value, 0)));
+    const muestras = Math.max(0, finiteNumber(estado.muestrasRecolectadas, 0));
+    const fraccionMuestras = Math.min(1, muestras / 3);
+    const instrumentos = Array.isArray(diseno.instrumentos) ? diseno.instrumentos : [];
+    const extras = Array.isArray(diseno.extras) ? diseno.extras : [];
+    const tieneBlindaje = Boolean(diseno.blindaje) || extras.includes('blindaje');
+    const tieneRedundancia = Boolean(diseno.redundancia) || extras.includes('redundancia');
+    const relayId = diseno.relay || 'ninguno';
+    const tieneTaladro = instrumentos.includes('taladro');
+    const costoTotal = Math.max(0, finiteNumber(evaluacion.costoTotal, 0));
 
-    // ------------------------------------------------------------------------
-    // 1. Éxito de misión (máx 400 pts)
-    // Llegada (100) + datos entregados proporcional (150) + éxito en Decisión 3 (150)
-    // ------------------------------------------------------------------------
-    const ptsLlegada = (estado.llegadaExitosa === false) ? 0 : 100;
-    const ratioDatos = evaluacion.datosGenerados === 0 ? 1 : Math.min(1, evaluacion.datosEntregados);
-    const ptsDatos = Math.round(ratioDatos * 150);
-    
-    let ptsDecision3 = 150;
-    if (estado.decision3Fallo === true) {
-      ptsDecision3 = 30; // Fallo por deslizamiento en cornisa
-    } else if (estado.decision3 === 'retirada_segura') {
-      ptsDecision3 = 140; // Prudencia y supervivencia garantizada
-    } else if (estado.decision3 === 'relay_equipo') {
-      ptsDecision3 = 150; // Sinergia orbital exitosa
-    } else if (estado.decision3 === 'extraccion_limite') {
-      ptsDecision3 = 150; // Éxito extraordinario
-    }
-    const ptsExitoMision = ptsLlegada + ptsDatos + ptsDecision3;
+    // 1. Éxito de misión: lanzamiento, EDL y transmisión de muestras (1000 pts).
+    const ptsLanzamientoRaw = clamp(estado.lanzamientoBonus, 0, 100);
+    const ptsEDLRaw = clamp(estado.edlPuntos, 0, 150);
+    const ptsTransmision = muestras === 0 ? 0 : Math.min(150, Math.round((muestras / 3) * 150));
+    const ptsExitoMision = ptsLanzamientoRaw + ptsEDLRaw + ptsTransmision;
 
-    // ------------------------------------------------------------------------
-    // 2. Valor científico (máx 300 pts)
-    // Ciencia final / ciencia máxima posible según objetivo
-    // ------------------------------------------------------------------------
-    const metasPorObjetivo = {
-      agua: 120,      // Enfoque en taladro, radar y espectrómetro
-      mapeo: 95,      // Enfoque en cámara alta, radar y cámara panorámica
-      economica: 65   // Enfoque en bajo costo con sensores esenciales
-    };
-    const cienciaMeta = metasPorObjetivo[objetivo] || 120;
-
-    // Bonos por alineación estratégica de instrumentos
-    let bonoAlineacion = 0;
-    const insts = Array.isArray(diseno.instrumentos) ? diseno.instrumentos : [];
-    if (objetivo === 'agua' && insts.includes('taladro')) bonoAlineacion += 10;
-    if (objetivo === 'mapeo' && insts.includes('camaraAlta')) bonoAlineacion += 10;
-    if (objetivo === 'economica' && evaluacion.costoTotal <= 300) bonoAlineacion += 10;
-
-    const cienciaFinal = evaluacion.ciencia + bonoAlineacion;
-    const ratioCiencia = Math.min(1.0, Math.max(0, cienciaFinal / cienciaMeta));
-    const ptsValorCientifico = Math.round(ratioCiencia * 300);
-
-    // ------------------------------------------------------------------------
-    // 3. Eficiencia de recursos (máx 150 pts)
-    // Presupuesto sobrante (50) + uso eficiente de masa (50) + margen de energía (50)
-    // ------------------------------------------------------------------------
-    // Presupuesto (50 pts)
-    let ptsPresupuesto = 0;
-    if (evaluacion.costoTotal <= presupuestoMax) {
-      const ahorro = Math.max(0, (presupuestoMax - evaluacion.costoTotal) / presupuestoMax);
-      ptsPresupuesto = 25 + Math.round(25 * ahorro);
-    }
-
-    // Masa vs Capacidad cohete (50 pts)
-    let ptsMasa = 0;
-    const capCohete = evaluacion.capacidadCohete || 400;
-    const ratioMasa = evaluacion.masaTotal / capCohete;
-    if (evaluacion.masaTotal <= capCohete) {
-      if (ratioMasa >= 0.50 && ratioMasa <= 0.95) {
-        ptsMasa = 50; // Óptimo aprovechamiento sin riesgo de sobrecarga
-      } else if (ratioMasa < 0.50) {
-        ptsMasa = 35; // Subutilizado (cohete excesivo para la carga)
-      } else {
-        ptsMasa = 40; // Próximo al 100% pero válido
-      }
-    }
-
-    // Margen de energía (50 pts)
-    let ptsEnergia = 0;
-    if (evaluacion.factorEnergia >= 1.0) {
-      ptsEnergia = 50;
-    } else if (evaluacion.factorEnergia >= 0.85) {
-      ptsEnergia = 40;
-    } else if (evaluacion.factorEnergia >= 0.50) {
-      ptsEnergia = 20;
-    } else {
-      ptsEnergia = 0;
-    }
-
-    const ptsEficienciaRecursos = ptsPresupuesto + ptsMasa + ptsEnergia;
-
-    // ------------------------------------------------------------------------
-    // 4. Calidad de decisiones (máx 150 pts)
-    // Manejo del riesgo (75) + Coherencia con el objetivo (75)
-    // ------------------------------------------------------------------------
-    // Manejo de riesgo (75 pts)
-    const coheteId = diseno.cohete || 'medio';
-    const ptsCohete = coheteId === 'pesado' ? 25 : (coheteId === 'medio' ? 24 : 20);
-    const tieneBlindaje = Boolean(diseno.blindaje) || (Array.isArray(diseno.extras) && diseno.extras.includes('blindaje'));
-    const tieneRedundancia = Boolean(diseno.redundancia) || (Array.isArray(diseno.extras) && diseno.extras.includes('redundancia'));
-    const ptsBlindaje = tieneBlindaje ? 20 : 0;
-    const ptsRedundancia = tieneRedundancia ? 15 : 0;
-    const ptsSinIncidentes = (estado.eventosOcurridos?.length || 0) <= 1 ? 15 : 5;
-    const ptsManejoRiesgo = Math.min(75, ptsCohete + ptsBlindaje + ptsRedundancia + ptsSinIncidentes);
-
-    // Coherencia con el objetivo (75 pts)
-    let ptsCoherencia = 0;
+    // 2. Ciencia: rendimiento del diseño ajustado por muestras y por el objetivo.
+    const metasPorObjetivo = { agua: 120, mapeo: 95, economica: 65 };
+    const cienciaMeta = metasPorObjetivo[objetivo];
+    let factorObjetivo = 1;
     if (objetivo === 'agua') {
-      if (insts.includes('taladro')) ptsCoherencia += 35;
-      if (insts.includes('espectrometro')) ptsCoherencia += 25;
-      if (insts.includes('radar')) ptsCoherencia += 15;
+      factorObjetivo += ['espectrometro', 'radar', 'taladro']
+        .filter(instrumento => instrumentos.includes(instrumento)).length * 0.1;
     } else if (objetivo === 'mapeo') {
-      if (insts.includes('camaraAlta')) ptsCoherencia += 35;
-      if (insts.includes('radar')) ptsCoherencia += 25;
-      if (insts.includes('camaraPan')) ptsCoherencia += 15;
-    } else if (objetivo === 'economica') {
-      if (evaluacion.costoTotal <= 250) ptsCoherencia = 75;
-      else if (evaluacion.costoTotal <= 320) ptsCoherencia = 55;
-      else ptsCoherencia = 35;
+      factorObjetivo += ['camaraPan', 'camaraAlta']
+        .filter(instrumento => instrumentos.includes(instrumento)).length * 0.1;
+    } else if (presupuestoMax > 0) {
+      const ahorro = clamp((presupuestoMax - costoTotal) / presupuestoMax, 0, 1);
+      factorObjetivo += ahorro * 0.1;
     }
-    ptsCoherencia = Math.min(75, ptsCoherencia);
-    const ptsCalidadDecisiones = ptsManejoRiesgo + ptsCoherencia;
+    const cienciaDiseno = Math.max(0, finiteNumber(evaluacion.ciencia, 0));
+    const tieneTelemetria = finiteNumber(estado.datosTransito, 0) > 0 || Boolean(estado.decision2);
+    const ptsValorCientifico = muestras === 0
+      ? (tieneTelemetria ? 30 : 0)
+      : Math.min(300, Math.round((cienciaDiseno * fraccionMuestras / cienciaMeta) * factorObjetivo * 300));
+
+    // 3. Recursos: batería restante, presupuesto disponible y salud de paneles.
+    const bateria = clamp(estado.bateriaActual, 0, 100);
+    const danoPaneles = clamp(estado.danoPaneles, 0, 100);
+    const ptsBateria = Math.round(bateria / 2);
+    const ptsPresupuesto = presupuestoMax > 0
+      ? Math.round(clamp((presupuestoMax - costoTotal) / presupuestoMax, 0, 1) * 50)
+      : 0;
+    const ptsPaneles = Math.round((100 - danoPaneles) / 2);
+    const ptsEficienciaRecursos = ptsBateria + ptsPresupuesto + ptsPaneles;
+
+    // 4. Decisiones: coherencia con hardware y penalización por cada tramo abandonado.
+    let ptsDecision2 = 0;
+    if (estado.decision2 === 'modo_seguro') {
+      ptsDecision2 = 75;
+    } else if (estado.decision2 === 'maniobra_inteligente') {
+      ptsDecision2 = diseno.antena === 'alta' ? 75 : 45;
+    } else if (estado.decision2 === 'seguir_al_maximo') {
+      ptsDecision2 = tieneBlindaje && tieneRedundancia ? 75 : (tieneBlindaje || tieneRedundancia ? 55 : 25);
+    }
+
+    let ptsDecision3 = 0;
+    if (estado.decision3 === 'retirada_segura') {
+      ptsDecision3 = 75;
+    } else if (estado.decision3 === 'relay_equipo') {
+      ptsDecision3 = relayId !== 'ninguno' ? 75 : 0;
+    } else if (estado.decision3 === 'extraccion_limite') {
+      ptsDecision3 = tieneTaladro ? (estado.decision3Fallo === true ? 40 : 75) : 0;
+    }
+    const tramosSaltados = Math.max(0, Math.floor(finiteNumber(estado.tramosSaltados, 0)));
+    const ptsDecisionesAntesPenalizacion = Math.min(150, ptsDecision2 + ptsDecision3);
+    const penalizacionSaltos = tramosSaltados * 50;
+    const ptsCalidadDecisiones = Math.max(0, ptsDecisionesAntesPenalizacion - penalizacionSaltos);
 
     // ------------------------------------------------------------------------
     // PUNTUACIÓN TOTAL Y RANGO
@@ -337,25 +298,27 @@
           nombre: 'Éxito de la Misión',
           puntos: ptsExitoMision,
           maximo: 400,
-          desglose: `Llegada: ${ptsLlegada}/100 • Datos entregados: ${ptsDatos}/150 • Descenso EDL: ${ptsDecision3}/150`
+          desglose: `Bono lanzamiento: ${ptsLanzamientoRaw}/100 • EDL: ${ptsEDLRaw}/150 • Transmisión por muestras: ${ptsTransmision}/150 (${muestras} muestras)`
         },
         valorCientifico: {
           nombre: 'Valor Científico',
           puntos: ptsValorCientifico,
           maximo: 300,
-          desglose: `Ciencia: ${evaluacion.ciencia} pts (Meta ${objetivo}: ${cienciaMeta} pts) • Bono alineación: +${bonoAlineacion}`
+          desglose: muestras === 0
+            ? `Telemetría básica: ${ptsValorCientifico}/30 • Sin muestras científicas`
+            : `Ciencia de diseño: ${cienciaDiseno} pts × ${fraccionMuestras.toFixed(2)} por muestras × bono ${objetivo} (${factorObjetivo.toFixed(2)})`
         },
         eficienciaRecursos: {
           nombre: 'Eficiencia de Recursos',
           puntos: ptsEficienciaRecursos,
           maximo: 150,
-          desglose: `Presupuesto: ${ptsPresupuesto}/50 • Carga masa: ${ptsMasa}/50 • Margen energía: ${ptsEnergia}/50`
+          desglose: `Batería: ${ptsBateria}/50 (${bateria}%) • Presupuesto sobrante: ${ptsPresupuesto}/50 • Salud paneles: ${ptsPaneles}/50 (${100 - danoPaneles}%)`
         },
         calidadDecisiones: {
           nombre: 'Calidad de Decisiones',
           puntos: ptsCalidadDecisiones,
           maximo: 150,
-          desglose: `Manejo del riesgo: ${ptsManejoRiesgo}/75 • Coherencia con objetivo '${objetivo}': ${ptsCoherencia}/75`
+          desglose: `Decisión 2 según hardware: ${ptsDecision2}/75 • Decisión 3 según hardware: ${ptsDecision3}/75 • Tramos abandonados: -${penalizacionSaltos} (${tramosSaltados} × 50)`
         }
       },
       ejesRadar: [
@@ -475,4 +438,3 @@
     console.error('Error al inicializar o verificar el motor de Ares-I:', err);
   }
 })(typeof window !== 'undefined' ? window : this);
-

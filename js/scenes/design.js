@@ -239,7 +239,6 @@
 
     <div class="paso-nav" style="margin-top:20px;">
       <button type="button" class="btn" id="btn-p4-back">⬅ ATRÁS</button>
-      <button type="button" class="btn" id="btn-saltar-reporte">📊 Saltar al Reporte</button>
       <button type="button" class="btn btn-launch" id="btn-lanzar" disabled>🚀 LANZAR MISIÓN</button>
     </div>
   </div>
@@ -496,25 +495,6 @@
         evaluarYActualizarUI();
         if (window.Sound?.playBeep) window.Sound.playBeep();
       });
-    });
-
-    // Saltar al reporte
-    document.getElementById('btn-saltar-reporte')?.addEventListener('click', () => {
-      const res = estado.evaluacionActual || window.Engine.evaluarDiseno(d, estado.presupuestoMax);
-      estado.evaluacionActual = res;
-      estado.evaluacion = res;
-      if (!estado.historialCausaEfecto?.length) {
-        estado.historialCausaEfecto = [];
-        estado.registrarCausaEfecto('Diseño', `Cohete ${d.cohete}, Panel ${d.panel}`,
-          `Masa:${res.masaTotal}kg Costo:${res.costoTotal}M$ Meses:${res.meses}`,
-          'Configuración técnica aprobada.');
-        estado.registrarCausaEfecto('Vuelo', 'Tormenta solar simulada', 'Batería -15%, daño paneles 5%', 'Decisión: Maniobra inteligente.');
-        estado.registrarCausaEfecto('Rover', 'Muestra recolectada', '3 muestras válidas', 'Decisión: Retirada segura.');
-      }
-      if (!estado.muestrasRecolectadas) estado.muestrasRecolectadas = 3;
-      if (!estado.decision2) estado.decision2 = 'maniobra_optima';
-      if (!estado.decision3) estado.decision3 = 'retirada_segura';
-      window.UI?.cambiarEscena?.('report');
     });
 
     // Lanzar misión

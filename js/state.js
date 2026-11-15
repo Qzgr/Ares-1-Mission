@@ -37,7 +37,9 @@
       danoPaneles: 0,
       datosTransito: 0,
       muestrasRecolectadas: 0,
+      tramosSaltados: 0,
       edlPrecision: 0,
+      edlPuntos: 0,
       lanzamientoBonus: 0,
       decision2: null,
       decision3: null,
@@ -128,6 +130,7 @@
       historialCausaEfecto: historialActual,
       muestrasRecolectadas: 0,
       edlPrecision: 0,
+      edlPuntos: 0,
       lanzamientoBonus: 0,
       decision2: null,
       decision3: null

@@ -330,6 +330,17 @@
     const btnRedisenar = container.querySelector('#btn-reporte-redisenar');
     if (btnRedisenar) {
       btnRedisenar.addEventListener('click', () => {
+        if (typeof window.reiniciarEstado !== 'function') {
+          console.error('No se puede rediseñar: reiniciarEstado no está disponible.');
+          return;
+        }
+        const disenoActual = window.estadoMision?.diseno || {};
+        const diseno = {
+          ...disenoActual,
+          instrumentos: Array.isArray(disenoActual.instrumentos) ? [...disenoActual.instrumentos] : [],
+          extras: Array.isArray(disenoActual.extras) ? [...disenoActual.extras] : disenoActual.extras
+        };
+        window.reiniciarEstado({ diseno });
         if (window.UI?.cambiarEscena) {
           window.UI.cambiarEscena('design');
         }
@@ -340,9 +351,11 @@
     const btnReiniciar = container.querySelector('#btn-reporte-reiniciar');
     if (btnReiniciar) {
       btnReiniciar.addEventListener('click', () => {
-        if (window.reiniciarEstado) {
-          window.reiniciarEstado();
+        if (typeof window.reiniciarEstado !== 'function') {
+          console.error('No se puede iniciar otra misión: reiniciarEstado no está disponible.');
+          return;
         }
+        window.reiniciarEstado();
         window.UI?.limpiarBarraRecursos?.();
         if (window.UI?.cambiarEscena) {
           window.UI.cambiarEscena('briefing');

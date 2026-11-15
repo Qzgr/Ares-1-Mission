@@ -9,7 +9,7 @@
 (function (window) {
   'use strict';
 
-  let faseActual = 'minijuego'; // 'minijuego' | 'alerta'
+  let faseActual = 'lanzamiento'; // 'lanzamiento' | 'minijuego' | 'alerta'
   let animId = null;
   let timerInterval = null;
   let listenersActivos = [];
@@ -33,7 +33,7 @@
   }
 
   /**
-   * Renderiza el minijuego o la alerta de tormenta.
+   * Renderiza la fase activa del vuelo.
    */
   function render(container) {
     if (!container) return;
@@ -43,11 +43,178 @@
     const diseno = estado.diseno || {};
     const evaluacion = estado.evaluacionActual || (window.Engine?.evaluarDiseno ? window.Engine.evaluarDiseno(diseno, estado.presupuestoMax) : {});
 
-    if (faseActual === 'minijuego') {
+    if (faseActual === 'lanzamiento') {
+      renderLanzamiento(container, estado, diseno);
+    } else if (faseActual === 'minijuego') {
       renderMinijuego(container, estado, diseno, evaluacion);
     } else {
       renderAlertaTormenta(container, estado, diseno, evaluacion);
     }
+  }
+
+  function renderLanzamiento(container, estado, diseno) {
+    container.innerHTML = `
+      <div class="marco-nasa fase-lanzamiento">
+        <span class="badge-tag">FASE 1 · SECUENCIA DE LANZAMIENTO</span>
+        <h1>¡Despegue de Ares-I!</h1>
+        <p>Mantén el empuje en la zona verde (60–85%) durante los 12 segundos de ascenso.</p>
+        <div class="lanzamiento-hud">
+          <strong>TIEMPO: <span id="launch-time">12.0</span> s</strong>
+          <strong>POTENCIA: <span id="launch-power">50</span>%</strong>
+          <strong>BONO: <span id="launch-score">0</span> pts</strong>
+        </div>
+        <div class="lanzamiento-medidor" role="meter" aria-label="Potencia de empuje"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <div class="lanzamiento-zona-verde"></div>
+          <div class="lanzamiento-aguja" id="launch-needle"></div>
+        </div>
+        <canvas id="canvas-lanzamiento" width="640" height="360"
+                aria-label="Cohete Ares-I despegando desde la plataforma"></canvas>
+        <button type="button" class="btn btn-launch" id="btn-mantener-empuje"
+                aria-pressed="false">MANTENER EMPUJE</button>
+        <p class="briefing-caption">Mantén Espacio o el botón para aumentar el empuje; suéltalo para reducirlo.</p>
+      </div>
+    `;
+
+    const canvas = container.querySelector('#canvas-lanzamiento');
+    const ctx = canvas?.getContext('2d');
+    if (!ctx || !window.Sprites?.dibujarCoheteModular) {
+      estado.lanzamientoBonus = 0;
+      faseActual = 'minijuego';
+      render(container);
+      return;
+    }
+
+    const duration = 12;
+    const keys = {};
+    let elapsed = 0;
+    let greenTime = 0;
+    let power = 50;
+    let previousTime = performance.now();
+    const btnEmpuje = container.querySelector('#btn-mantener-empuje');
+    const hudTime = container.querySelector('#launch-time');
+    const hudPower = container.querySelector('#launch-power');
+    const hudScore = container.querySelector('#launch-score');
+    const needle = container.querySelector('#launch-needle');
+    const meter = container.querySelector('.lanzamiento-medidor');
+
+    const setThrust = (pressed) => {
+      keys.Space = pressed;
+      btnEmpuje?.setAttribute('aria-pressed', String(pressed));
+    };
+    const keyDown = event => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        setThrust(true);
+      }
+    };
+    const keyUp = event => {
+      if (event.code === 'Space') setThrust(false);
+    };
+    const pointerDown = event => {
+      event.preventDefault();
+      setThrust(true);
+      btnEmpuje?.setPointerCapture?.(event.pointerId);
+    };
+    const pointerUp = () => setThrust(false);
+    document.addEventListener('keydown', keyDown);
+    document.addEventListener('keyup', keyUp);
+    btnEmpuje?.addEventListener('pointerdown', pointerDown);
+    btnEmpuje?.addEventListener('pointerup', pointerUp);
+    btnEmpuje?.addEventListener('pointercancel', pointerUp);
+    btnEmpuje?.addEventListener('lostpointercapture', pointerUp);
+    listenersActivos.push(
+      { elemento: document, evento: 'keydown', handler: keyDown },
+      { elemento: document, evento: 'keyup', handler: keyUp }
+    );
+    if (btnEmpuje) {
+      listenersActivos.push(
+        { elemento: btnEmpuje, evento: 'pointerdown', handler: pointerDown },
+        { elemento: btnEmpuje, evento: 'pointerup', handler: pointerUp },
+        { elemento: btnEmpuje, evento: 'pointercancel', handler: pointerUp },
+        { elemento: btnEmpuje, evento: 'lostpointercapture', handler: pointerUp }
+      );
+    }
+
+    function dibujar(now) {
+      const dt = Math.min(duration - elapsed, Math.max(0, (now - previousTime) / 1000));
+      previousTime = now;
+      elapsed += dt;
+      const pushing = keys.Space;
+      const powerRate = pushing ? 42 : -30;
+      const reachesGreenStart = (60 - power) / powerRate;
+      const reachesGreenEnd = (85 - power) / powerRate;
+      greenTime += Math.max(0,
+        Math.min(dt, Math.max(reachesGreenStart, reachesGreenEnd)) -
+        Math.max(0, Math.min(reachesGreenStart, reachesGreenEnd)));
+      power = Math.max(0, Math.min(100, power + powerRate * dt));
+
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#132247';
+      ctx.fillRect(0, 0, canvas.width, 240);
+      ctx.fillStyle = '#facc15';
+      [[90, 50], [188, 88], [470, 43], [555, 105]].forEach(([x, y]) => ctx.fillRect(x, y, 3, 3));
+
+      const groundY = 280;
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(242, groundY - 5, 156, 10);
+      ctx.fillRect(270, groundY - 55, 10, 55);
+      ctx.fillRect(360, groundY - 55, 10, 55);
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(264, groundY - 38, 96, 8);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(276, groundY - 44, 72, 6);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(272, groundY - 144, 8, 100);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(280, groundY - 119, 16, 4);
+      ctx.fillRect(280, groundY - 79, 16, 4);
+
+      const lift = elapsed * 8;
+      const yBase = groundY - 24 - lift;
+      if (pushing) {
+        ctx.fillStyle = power >= 60 && power <= 85 ? '#22c55e' : '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(306, yBase - 18);
+        ctx.lineTo(318, yBase + 8 + Math.random() * 8);
+        ctx.lineTo(330, yBase - 18);
+        ctx.fill();
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(278, 0, 76, yBase - 18);
+      ctx.clip();
+      window.Sprites.dibujarCoheteModular(ctx, 300, yBase, diseno, 4);
+      ctx.restore();
+
+      if (hudTime) hudTime.textContent = (duration - elapsed).toFixed(1);
+      if (hudPower) hudPower.textContent = String(Math.round(power));
+      if (hudScore) hudScore.textContent = String(Math.round(greenTime / duration * 100));
+      if (needle) needle.style.left = `${power}%`;
+      if (meter) meter.setAttribute('aria-valuenow', String(Math.round(power)));
+
+      if (elapsed >= duration) {
+        estado.lanzamientoBonus = Math.round(greenTime / duration * 100);
+        estado.registrarCausaEfecto?.(
+          '1. Secuencia de Lanzamiento',
+          `Control de empuje dentro de la zona verde: ${Math.round(greenTime)}/${duration} s`,
+          `Bono de lanzamiento: ${estado.lanzamientoBonus}/100 pts`,
+          estado.lanzamientoBonus > 0
+            ? 'El empuje se mantuvo dentro del margen operativo recomendado durante parte del ascenso.'
+            : 'No se mantuvo el empuje en el margen operativo recomendado.'
+        );
+        limpiarCiclos();
+        faseActual = 'minijuego';
+        render(container);
+        return;
+      }
+      animId = requestAnimationFrame(dibujar);
+    }
+
+    animId = requestAnimationFrame(dibujar);
   }
 
   /**
@@ -69,14 +236,10 @@
             <span>⏱️ TIEMPO: <strong class="minijuego-hud-timer" id="hud-timer-flight">30s</strong></span>
             <span>🔋 BATERÍA: <strong id="hud-bateria-flight" style="color: var(--cyan-glow)">${estado.bateriaActual || 100}%</strong></span>
           </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn-secondary" id="btn-continuar-alerta-top">
-              Continuar a alerta/decisión
-            </button>
-            <button type="button" class="btn-secondary" id="btn-saltar-simulacion" style="border-color: var(--neon-orange); color: var(--neon-orange)">
-              ⏭️ Saltar simulación
-            </button>
-          </div>
+          <button type="button" class="btn-secondary" id="btn-abandonar-tramo-flight"
+                  style="border-color: var(--neon-orange); color: var(--neon-orange)">
+            ⚠ ABANDONAR TRAMO (0 PTS)
+          </button>
         </div>
 
         <div class="canvas-wrapper">
@@ -91,15 +254,29 @@
       </div>
     `;
 
-    // Conectar botones de salto directo a la decisión
-    const irAlerta = () => {
+    container.querySelector('#btn-abandonar-tramo-flight')?.addEventListener('click', () => {
+      const mision = window.estadoMision;
+      if (!mision || faseActual !== 'minijuego') return;
+      const tramosSaltados = Number(mision.tramosSaltados);
+      mision.tramosSaltados = (Number.isFinite(tramosSaltados) ? Math.max(0, tramosSaltados) : 0) + 1;
+      mision.lanzamientoBonus = 0;
+      mision.muestrasRecolectadas = 0;
+      const historial = Array.isArray(mision.historialCausaEfecto) ? mision.historialCausaEfecto : [];
+      const lanzamiento = [...historial].reverse().find(item => item?.etapa === '1. Secuencia de Lanzamiento');
+      if (lanzamiento) {
+        lanzamiento.consecuencia = 'Bono de lanzamiento: 0/100 pts (tramo abandonado)';
+        lanzamiento.explicacion = 'El jugador abandonó el tramo y perdió el bono obtenido durante el ascenso.';
+      }
+      mision.registrarCausaEfecto?.(
+        '2. Tránsito Interplanetario',
+        'Tramo abandonado por el jugador',
+        '0 pts de lanzamiento; 0 muestras; penalización de 50 pts en decisiones',
+        'El tramo se abandonó explícitamente y no se conceden puntos por su desempeño.'
+      );
       limpiarCiclos();
       faseActual = 'alerta';
       render(container);
-    };
-
-    container.querySelector('#btn-saltar-simulacion')?.addEventListener('click', irAlerta);
-    container.querySelector('#btn-continuar-alerta-top')?.addEventListener('click', irAlerta);
+    });
 
     iniciarLoopCanvasFlight(container, estado, evaluacion);
   }
@@ -722,7 +899,9 @@
   function iniciar() {
     const contenedor = document.getElementById('escena-flight');
     if (!contenedor) return;
-    faseActual = 'minijuego';
+    limpiarCiclos();
+    faseActual = 'lanzamiento';
+    if (window.estadoMision) window.estadoMision.lanzamientoBonus = 0;
     render(contenedor);
   }
 
