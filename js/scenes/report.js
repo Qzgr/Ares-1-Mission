@@ -336,15 +336,16 @@
       });
     }
 
-    // Botón Jugar de nuevo (reinicia todo y regresa al inicio/diseño)
+    // Botón Jugar de nuevo (reinicia todo y regresa al briefing)
     const btnReiniciar = container.querySelector('#btn-reporte-reiniciar');
     if (btnReiniciar) {
       btnReiniciar.addEventListener('click', () => {
         if (window.reiniciarEstado) {
           window.reiniciarEstado();
         }
+        window.UI?.limpiarBarraRecursos?.();
         if (window.UI?.cambiarEscena) {
-          window.UI.cambiarEscena('design');
+          window.UI.cambiarEscena('briefing');
         }
       });
     }
@@ -366,4 +367,3 @@
   };
 
 })(typeof window !== 'undefined' ? window : this);
-

@@ -98,11 +98,36 @@
   // Reinicia el estado manteniendo la referencia original
   function reiniciarEstado(overrides = {}) {
     const fresh = crearEstadoInicial();
-    // Vaciar arrays manteniendo referencia
-    estado.eventosOcurridos.length = 0;
-    estado.historialCausaEfecto.length = 0;
-    // Aplicar sobrescritura
-    Object.assign(estado, fresh, overrides);
+    const disenoActual = estado.diseno;
+    const eventosActuales = estado.eventosOcurridos;
+    const historialActual = estado.historialCausaEfecto;
+    const disenoInicial = { ...fresh.diseno, ...(overrides.diseno || {}) };
+    piezasDiseno.forEach(prop => {
+      if (Object.prototype.hasOwnProperty.call(overrides, prop)) {
+        disenoInicial[prop] = overrides[prop];
+      }
+    });
+
+    Object.keys(estado).forEach(prop => {
+      if (!(prop in fresh) && !piezasDiseno.includes(prop) &&
+          prop !== 'registrarCausaEfecto' && prop !== 'registrarEvento') {
+        delete estado[prop];
+      }
+    });
+
+    Object.keys(disenoActual).forEach(prop => {
+      if (!(prop in disenoInicial)) delete disenoActual[prop];
+    });
+    Object.assign(disenoActual, disenoInicial);
+
+    eventosActuales.splice(0, eventosActuales.length, ...(overrides.eventosOcurridos || []));
+    historialActual.splice(0, historialActual.length, ...(overrides.historialCausaEfecto || []));
+
+    Object.assign(estado, fresh, overrides, {
+      diseno: disenoActual,
+      eventosOcurridos: eventosActuales,
+      historialCausaEfecto: historialActual
+    });
     return estado;
   }
 

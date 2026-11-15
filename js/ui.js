@@ -74,11 +74,11 @@
       elEnergiaBar.className = `progress-fill ${obtenerClaseEstado(fe, 0.9, 0.5, true)}`;
     }
 
-    // 4. Datos (capacidadTx / datosGenerados UD)
+    // 4. Datos (datosGenerados / capacidadTx UD)
     const elDatosVal = document.getElementById('res-datos-val');
     const elDatosBar = document.getElementById('res-datos-bar');
     if (elDatosVal && elDatosBar) {
-      elDatosVal.textContent = `${metricas.capacidadTx} / ${metricas.datosGenerados} UD`;
+      elDatosVal.textContent = `${metricas.datosGenerados} / ${metricas.capacidadTx} UD`;
       const pctDatos = metricas.datosGenerados === 0 ? 100 : Math.min(100, Math.round(metricas.datosEntregados * 100));
       elDatosBar.style.width = `${pctDatos}%`;
       elDatosBar.className = `progress-fill ${obtenerClaseEstado(metricas.datosEntregados, 0.99, 0.70, true)}`;
@@ -108,6 +108,27 @@
     }
   }
 
+  function limpiarBarraRecursos() {
+    const valoresIniciales = {
+      'res-presupuesto-val': '-- / -- M$',
+      'res-masa-val': '-- / -- kg',
+      'res-energia-val': '--%',
+      'res-datos-val': '-- / -- UD',
+      'res-comms-val': '--%',
+      'res-tiempo-val': `-- / ${(window.DATA || {}).ventanaMeses || 28} m`
+    };
+
+    Object.entries(valoresIniciales).forEach(([id, valor]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = valor;
+    });
+
+    document.querySelectorAll('.progress-fill').forEach(barra => {
+      barra.style.width = '0%';
+      barra.className = 'progress-fill';
+    });
+  }
+
   /**
    * Cambia la escena visible activa en la interfaz.
    * 
@@ -127,7 +148,9 @@
     }
 
     // Inicializar la escena correspondiente si existe su controlador
-    if (nombreEscena === 'design' && window.DesignScene?.iniciar) {
+    if (nombreEscena === 'briefing' && window.BriefingScene?.iniciar) {
+      window.BriefingScene.iniciar();
+    } else if (nombreEscena === 'design' && window.DesignScene?.iniciar) {
       window.DesignScene.iniciar();
     } else if (nombreEscena === 'flight' && window.FlightScene?.iniciar) {
       window.FlightScene.iniciar();
@@ -140,8 +163,8 @@
 
   window.UI = {
     actualizarBarraRecursos,
+    limpiarBarraRecursos,
     cambiarEscena
   };
 
 })(typeof window !== 'undefined' ? window : this);
-

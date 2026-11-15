@@ -226,7 +226,7 @@
         <div class="sem-msg"   id="msg-sem-energia">Verificando...</div>
       </div>
       <div class="sem-item" id="sem-datos">
-        <div class="sem-label">Datos vs TX</div>
+        <div class="sem-label">Datos generados / capacidad TX</div>
         <div class="sem-valor" id="val-sem-datos">-- / -- UD</div>
         <div class="sem-msg"   id="msg-sem-datos">Verificando...</div>
       </div>
@@ -421,12 +421,12 @@
 
     // Datos
     if (res.datosEntregados < 0.7 && res.datosGenerados > 0) {
-      semSet('datos', 'rojo', `${res.capacidadTx}/${res.datosGenerados} UD`, `Pérdida severa (${Math.round(res.datosEntregados*100)}%)`);
+      semSet('datos', 'rojo', `${res.datosGenerados}/${res.capacidadTx} UD`, `Pérdida severa (${Math.round(res.datosEntregados*100)}%)`);
       hayRojos = true;
     } else if (res.datosEntregados < 1 && res.datosGenerados > 0) {
-      semSet('datos', 'amarillo', `${res.capacidadTx}/${res.datosGenerados} UD`, `Cuello de botella (${Math.round(res.datosEntregados*100)}%)`);
+      semSet('datos', 'amarillo', `${res.datosGenerados}/${res.capacidadTx} UD`, `Cuello de botella (${Math.round(res.datosEntregados*100)}%)`);
     } else {
-      semSet('datos', 'verde', `${res.capacidadTx}/${res.datosGenerados} UD`, 'Enlace completo ✓');
+      semSet('datos', 'verde', `${res.datosGenerados}/${res.capacidadTx} UD`, 'Enlace completo ✓');
     }
 
     // Meses
@@ -541,6 +541,8 @@
       conectarEventos();
       iniciarCanvas();
       initialized = true;
+    } else {
+      irPaso(1);
     }
 
     sincronizarControles();

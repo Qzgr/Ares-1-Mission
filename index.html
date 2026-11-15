@@ -43,9 +43,9 @@
         </div>
       </div>
 
-      <div class="recurso-card" id="card-res-datos" title="Capacidad de transmisión vs datos generados">
+      <div class="recurso-card" id="card-res-datos" title="Datos generados / capacidad de transmisión">
         <div class="recurso-header">
-          <span class="recurso-label">📡 Datos</span>
+          <span class="recurso-label">📡 Datos / TX</span>
           <span class="recurso-valor" id="res-datos-val">-- / -- UD</span>
         </div>
         <div class="progress-track">
@@ -77,8 +77,8 @@
 
   <!-- CONTENEDOR PRINCIPAL DE ESCENAS -->
   <main class="app-main" id="app-main">
-    <section class="escena" id="escena-briefing"></section>
-    <section class="escena activa" id="escena-design"></section>
+    <section class="escena activa" id="escena-briefing"></section>
+    <section class="escena" id="escena-design"></section>
     <section class="escena" id="escena-flight"></section>
     <section class="escena" id="escena-rover"></section>
     <section class="escena" id="escena-report"></section>
@@ -101,8 +101,8 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.DesignScene?.iniciar) {
-        window.DesignScene.iniciar();
+      if (window.UI?.cambiarEscena) {
+        window.UI.cambiarEscena('briefing');
       }
     });
   </script>
