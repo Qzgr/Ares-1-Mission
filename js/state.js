@@ -41,6 +41,8 @@
       edlPrecision: 0,
       edlPuntos: 0,
       lanzamientoBonus: 0,
+      regresoLanzamientoBonus: 0,
+      amerizajePuntos: 0,
       decision2: null,
       decision3: null,
       eventosOcurridos: [],
@@ -102,7 +104,7 @@
   // Reinicia el estado manteniendo la referencia original
   function reiniciarEstado(overrides = {}) {
     const fresh = crearEstadoInicial();
-    const disenoActual = estado.diseno;
+    const disenoActual = estado.diseno || {};
     const eventosActuales = estado.eventosOcurridos;
     const historialActual = estado.historialCausaEfecto;
     const disenoInicial = { ...fresh.diseno, ...(overrides.diseno || {}) };
@@ -124,19 +126,37 @@
     });
     Object.assign(disenoActual, disenoInicial);
 
+    if (Array.isArray(eventosActuales)) eventosActuales.length = 0;
+    if (Array.isArray(historialActual)) historialActual.length = 0;
+    if (Array.isArray(estado.eventosOcurridos)) estado.eventosOcurridos.length = 0;
+    if (Array.isArray(estado.historialCausaEfecto)) estado.historialCausaEfecto.length = 0;
+
+    const nuevoHistorial = [];
+    const nuevosEventos = [];
+
     Object.assign(estado, fresh, overrides, {
       diseno: disenoActual,
-      eventosOcurridos: eventosActuales,
-      historialCausaEfecto: historialActual,
+      eventosOcurridos: nuevosEventos,
+      historialCausaEfecto: nuevoHistorial,
+      bateriaActual: 100,
+      danoPaneles: 0,
+      datosTransito: 0,
       muestrasRecolectadas: 0,
+      tramosSaltados: 0,
       edlPrecision: 0,
       edlPuntos: 0,
       lanzamientoBonus: 0,
+      regresoLanzamientoBonus: 0,
+      amerizajePuntos: 0,
       decision2: null,
-      decision3: null
+      decision3: null,
+      decision2Detalle: null,
+      decision3Detalle: null,
+      decision3Fallo: false,
+      llegadaExitosa: false,
+      evaluacionActual: null,
+      evaluacion: null
     });
-    eventosActuales.length = 0;
-    historialActual.length = 0;
     return estado;
   }
 

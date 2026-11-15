@@ -184,14 +184,13 @@
    * @returns {Object} Desglose completo de puntuación, rango y datos para radar
    */
   function calcularPuntuacionFinal(estadoMision) {
-
-
     const estado = estadoMision || window.estadoMision || {};
     const diseno = estado.diseno || estado;
     const presupuestoMax = Math.max(0, finiteNumber(estado.presupuestoMax, 500));
     const evaluacion = estado.evaluacionActual || evaluarDiseno(diseno, presupuestoMax || 500);
     const objetivo = ['agua', 'mapeo', 'economica'].includes(estado.objetivo) ? estado.objetivo : 'agua';
     const clamp = (value, min, max) => Math.min(max, Math.max(min, finiteNumber(value, 0)));
+    const tramosSaltados = Math.max(0, Math.floor(finiteNumber(estado.tramosSaltados, 0)));
     const muestras = Math.max(0, finiteNumber(estado.muestrasRecolectadas, 0));
     const fraccionMuestras = Math.min(1, muestras / 3);
     const instrumentos = Array.isArray(diseno.instrumentos) ? diseno.instrumentos : [];
@@ -200,17 +199,21 @@
     const tieneRedundancia = Boolean(diseno.redundancia) || extras.includes('redundancia');
     const relayId = diseno.relay || 'ninguno';
     const tieneTaladro = instrumentos.includes('taladro');
-    const costoTotal = Math.max(0, finiteNumber(evaluacion.costoTotal, 0));
+    const costoTotal = Math.max(0, finiteNumber(evaluacion ? evaluacion.costoTotal : 0, 0));
 
-    // 1. Éxito de misión: lanzamiento, EDL y transmisión de muestras (1000 pts).
+    // 1. Éxito de misión: lanzamiento, EDL y transmisión de muestras (400 pts).
     const ptsLanzamientoRaw = clamp(estado.lanzamientoBonus, 0, 100);
-    const ptsEDLRaw = clamp(estado.edlPuntos, 0, 150);
+    let ptsEDLRaw = clamp(estado.edlPuntos != null ? estado.edlPuntos : estado.edlPrecision, 0, 150);
+    if (ptsEDLRaw === 0 && tramosSaltados === 0) {
+      if (estado.edlEstado === 'suave') ptsEDLRaw = 150;
+      else if (estado.edlEstado === 'brusco') ptsEDLRaw = 60;
+    }
     const ptsTransmision = muestras === 0 ? 0 : Math.min(150, Math.round((muestras / 3) * 150));
-    const ptsExitoMision = ptsLanzamientoRaw + ptsEDLRaw + ptsTransmision;
+    const ptsExitoMision = clamp(ptsLanzamientoRaw + ptsEDLRaw + ptsTransmision, 0, 400);
 
-    // 2. Ciencia: rendimiento del diseño ajustado por muestras y por el objetivo.
+    // 2. Ciencia: rendimiento del diseño ajustado por muestras y por el objetivo (300 pts).
     const metasPorObjetivo = { agua: 120, mapeo: 95, economica: 65 };
-    const cienciaMeta = metasPorObjetivo[objetivo];
+    const cienciaMeta = metasPorObjetivo[objetivo] || 120;
     let factorObjetivo = 1;
     if (objetivo === 'agua') {
       factorObjetivo += ['espectrometro', 'radar', 'taladro']
@@ -222,43 +225,63 @@
       const ahorro = clamp((presupuestoMax - costoTotal) / presupuestoMax, 0, 1);
       factorObjetivo += ahorro * 0.1;
     }
-    const cienciaDiseno = Math.max(0, finiteNumber(evaluacion.ciencia, 0));
+    const cienciaDiseno = Math.max(0, finiteNumber(evaluacion ? evaluacion.ciencia : 0, 0));
     const tieneTelemetria = finiteNumber(estado.datosTransito, 0) > 0 || Boolean(estado.decision2);
+    const baseMuestras = Math.round(fraccionMuestras * 75);
+    const calculoCiencia = Math.round((cienciaDiseno * fraccionMuestras / cienciaMeta) * factorObjetivo * 300);
     const ptsValorCientifico = muestras === 0
       ? (tieneTelemetria ? 30 : 0)
-      : Math.min(300, Math.round((cienciaDiseno * fraccionMuestras / cienciaMeta) * factorObjetivo * 300));
+      : clamp(Math.max(baseMuestras, calculoCiencia), 0, 300);
 
-    // 3. Recursos: batería restante, presupuesto disponible y salud de paneles.
-    const bateria = clamp(estado.bateriaActual, 0, 100);
-    const danoPaneles = clamp(estado.danoPaneles, 0, 100);
-    const ptsBateria = Math.round(bateria / 2);
-    const ptsPresupuesto = presupuestoMax > 0
+    // 3. Recursos: batería restante, presupuesto disponible y salud de paneles (150 pts).
+    //    Si hay tramos saltados, se bloquean bonificaciones de eficiencia.
+    const bateria = clamp(estado.bateriaActual != null ? estado.bateriaActual : 100, 0, 100);
+    const danoPaneles = clamp(estado.danoPaneles != null ? estado.danoPaneles : 0, 0, 100);
+    const ptsBateria = tramosSaltados > 0 ? 0 : Math.round(bateria / 2);
+    const ptsPresupuesto = tramosSaltados > 0 ? 0 : (presupuestoMax > 0
       ? Math.round(clamp((presupuestoMax - costoTotal) / presupuestoMax, 0, 1) * 50)
-      : 0;
-    const ptsPaneles = Math.round((100 - danoPaneles) / 2);
-    const ptsEficienciaRecursos = ptsBateria + ptsPresupuesto + ptsPaneles;
+      : 0);
+    const ptsPaneles = tramosSaltados > 0 ? 0 : Math.round((100 - danoPaneles) / 2);
+    const ptsEficienciaRecursos = clamp(ptsBateria + ptsPresupuesto + ptsPaneles, 0, 150);
 
-    // 4. Decisiones: coherencia con hardware y penalización por cada tramo abandonado.
+    // 4. Decisiones: coherencia con hardware y penalización por cada tramo abandonado (150 pts).
+    //    -60 pts por tramo saltado.
+    const getDecisionKey = (v) => {
+      if (!v) return '';
+      if (typeof v === 'object') return String(v.id || v.clave || v.nombre || v.opcion || '').toLowerCase();
+      return String(v).toLowerCase();
+    };
+    const dec2Key = getDecisionKey(estado.decision2);
+    const dec3Key = getDecisionKey(estado.decision3);
+
     let ptsDecision2 = 0;
-    if (estado.decision2 === 'modo_seguro') {
+    if (dec2Key.includes('segur')) {
       ptsDecision2 = 75;
-    } else if (estado.decision2 === 'maniobra_inteligente') {
+    } else if (dec2Key.includes('intelig')) {
       ptsDecision2 = diseno.antena === 'alta' ? 75 : 45;
-    } else if (estado.decision2 === 'seguir_al_maximo') {
+    } else if (dec2Key.includes('max') || dec2Key.includes('máx') || dec2Key.includes('seguir')) {
       ptsDecision2 = tieneBlindaje && tieneRedundancia ? 75 : (tieneBlindaje || tieneRedundancia ? 55 : 25);
+    } else if (dec2Key) {
+      ptsDecision2 = 40;
+    } else if (tramosSaltados === 0) {
+      ptsDecision2 = 50;
     }
 
     let ptsDecision3 = 0;
-    if (estado.decision3 === 'retirada_segura') {
+    if (dec3Key.includes('retir') || dec3Key.includes('segur')) {
       ptsDecision3 = 75;
-    } else if (estado.decision3 === 'relay_equipo') {
+    } else if (dec3Key.includes('relay') || dec3Key.includes('equipo')) {
       ptsDecision3 = relayId !== 'ninguno' ? 75 : 0;
-    } else if (estado.decision3 === 'extraccion_limite') {
+    } else if (dec3Key.includes('extra') || dec3Key.includes('limite') || dec3Key.includes('límite')) {
       ptsDecision3 = tieneTaladro ? (estado.decision3Fallo === true ? 40 : 75) : 0;
+    } else if (dec3Key) {
+      ptsDecision3 = 40;
+    } else if (tramosSaltados === 0) {
+      ptsDecision3 = 50;
     }
-    const tramosSaltados = Math.max(0, Math.floor(finiteNumber(estado.tramosSaltados, 0)));
+
     const ptsDecisionesAntesPenalizacion = Math.min(150, ptsDecision2 + ptsDecision3);
-    const penalizacionSaltos = tramosSaltados * 50;
+    const penalizacionSaltos = tramosSaltados * 60;
     const ptsCalidadDecisiones = Math.max(0, ptsDecisionesAntesPenalizacion - penalizacionSaltos);
 
     // ------------------------------------------------------------------------
@@ -287,38 +310,69 @@
       descripcionRango = 'La sonda sobrevivió y envió datos útiles, aunque con degradación de subsistemas y presupuesto ajustado.';
     }
 
+    // Epílogo de Regreso a la Tierra (Fase 6: bono hasta 250 pts fuera de la escala base)
+    const regresoLanzamientoBonus = clamp(estado.regresoLanzamientoBonus, 0, 100);
+    const amerizajePuntos = clamp(estado.amerizajePuntos, 0, 150);
+    const bonoRegreso = regresoLanzamientoBonus + amerizajePuntos;
+    const regresoPerfecto = bonoRegreso >= 200;
+
+    if (regresoPerfecto) {
+      rango += ' • Regreso perfecto';
+    }
+
     return {
       puntuacionTotal,
       rango,
       rangoClase,
       descripcionRango,
       evaluacion,
+      tramosSaltados,
+      penalizacionSaltos,
+      regresoLanzamientoBonus,
+      amerizajePuntos,
+      bonoRegreso,
+      regresoPerfecto,
       categorias: {
         exitoMision: {
           nombre: 'Éxito de la Misión',
           puntos: ptsExitoMision,
           maximo: 400,
-          desglose: `Bono lanzamiento: ${ptsLanzamientoRaw}/100 • EDL: ${ptsEDLRaw}/150 • Transmisión por muestras: ${ptsTransmision}/150 (${muestras} muestras)`
+          desglose: (function() {
+            const segsVerdes = ptsLanzamientoRaw > 0
+              ? Math.max(1, Math.round((ptsLanzamientoRaw / 100) * 12))
+              : 0;
+            const edlEst = estado.edlEstado || '';
+            const edlTexto = edlEst === 'suave'    ? 'Aterrizaje nominal'
+                           : edlEst === 'brusco'   ? 'Aterrizaje brusco con daños menores'
+                           : edlEst === 'chocado'  ? 'Impacto duro contra la superficie'
+                           : edlEst === 'abandonado' ? 'Tramo abandonado'
+                           : ptsEDLRaw >= 150 ? 'Aterrizaje nominal'
+                           : ptsEDLRaw >= 60  ? 'Aterrizaje brusco'
+                           : 'Sin aterrizaje registrado';
+            return `Lanzamiento: ${ptsLanzamientoRaw}/100 (${segsVerdes}/12 s zona verde) • EDL: ${ptsEDLRaw}/150 · ${edlTexto} • Transmisión: ${ptsTransmision}/150 (${muestras}/3 muestras)`;
+          })()
         },
         valorCientifico: {
           nombre: 'Valor Científico',
           puntos: ptsValorCientifico,
           maximo: 300,
           desglose: muestras === 0
-            ? `Telemetría básica: ${ptsValorCientifico}/30 • Sin muestras científicas`
-            : `Ciencia de diseño: ${cienciaDiseno} pts × ${fraccionMuestras.toFixed(2)} por muestras × bono ${objetivo} (${factorObjetivo.toFixed(2)})`
+            ? `Telemetría básica: ${ptsValorCientifico}/30 · Dan regresó sin muestras minerales del cráter`
+            : `Ciencia de diseño: ${cienciaDiseno} pts × ${fraccionMuestras.toFixed(2)} muestras (${muestras}/3) × bono ${objetivo} (×${factorObjetivo.toFixed(2)})`
         },
         eficienciaRecursos: {
           nombre: 'Eficiencia de Recursos',
           puntos: ptsEficienciaRecursos,
           maximo: 150,
-          desglose: `Batería: ${ptsBateria}/50 (${bateria}%) • Presupuesto sobrante: ${ptsPresupuesto}/50 • Salud paneles: ${ptsPaneles}/50 (${100 - danoPaneles}%)`
+          desglose: tramosSaltados > 0
+            ? `Bonificaciones bloqueadas por tramos abandonados (0/150 pts)`
+            : `Batería: ${ptsBateria}/50 (${Number(bateria).toFixed(1)}%) • Presupuesto sobrante: ${ptsPresupuesto}/50 • Salud paneles: ${ptsPaneles}/50 (${Number(100 - danoPaneles).toFixed(1)}%)`
         },
         calidadDecisiones: {
           nombre: 'Calidad de Decisiones',
           puntos: ptsCalidadDecisiones,
           maximo: 150,
-          desglose: `Decisión 2 según hardware: ${ptsDecision2}/75 • Decisión 3 según hardware: ${ptsDecision3}/75 • Tramos abandonados: -${penalizacionSaltos} (${tramosSaltados} × 50)`
+          desglose: `Decisión 2 según hardware: ${ptsDecision2}/75 • Decisión 3 según hardware: ${ptsDecision3}/75 • Tramos abandonados: -${penalizacionSaltos} (${tramosSaltados} × 60)`
         }
       },
       ejesRadar: [

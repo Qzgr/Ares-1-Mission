@@ -56,21 +56,31 @@
       elMasaBar.style.width = `${pctMasa}%`;
       elMasaBar.className = `progress-fill ${obtenerClaseEstado(metricas.masaTotal, capCohete * 0.9, capCohete)}`;
     }
-
-    // 3. Energía (factorEnergia % ponderado por batería y estado de paneles)
+    // 3. Energía / Batería Nave
+    //    En el taller (sin bateriaActual): muestra "Potencia Diseño" (factorEnergia del diseño).
+    //    En misión (con bateriaActual): muestra "Batería Nave" (carga real restante en tiempo real).
     const elEnergiaVal = document.getElementById('res-energia-val');
     const elEnergiaBar = document.getElementById('res-energia-bar');
+    const elEnergiaLabel = document.getElementById('res-energia-label');
     if (elEnergiaVal && elEnergiaBar) {
+      const enMision = typeof estado?.bateriaActual === 'number';
       let fe = metricas.factorEnergia;
-      if (typeof estado?.bateriaActual === 'number') {
-        const coefBat = estado.bateriaActual / 100;
+      let displayText;
+      if (enMision) {
+        // Batería Nave: carga real restante
+        const batPct = Math.min(100, Math.max(0, estado.bateriaActual));
         const coefPan = Math.max(0.1, 1 - ((estado.danoPaneles || 0) / 100));
-        fe = fe * (coefBat * 0.5 + coefPan * 0.5);
+        fe = fe * (batPct / 100 * 0.5 + coefPan * 0.5);
+        displayText = `${Number(batPct).toFixed(1)}%`;
+        if (elEnergiaLabel) elEnergiaLabel.textContent = 'BATERÍA NAVE';
+      } else {
+        // Potencia Diseño: factor energético del taller
+        displayText = `${Number(fe * 100).toFixed(1)}%`;
+        if (elEnergiaLabel) elEnergiaLabel.textContent = 'POTENCIA DISEÑO';
       }
       const pctEnergia = Math.min(100, Math.round(fe * 100));
-      elEnergiaVal.textContent = `${pctEnergia}%`;
+      elEnergiaVal.textContent = displayText;
       elEnergiaBar.style.width = `${pctEnergia}%`;
-      // Rojo si factorEnergia < 0.5 (50%), amarillo si < 0.90 (90%)
       elEnergiaBar.className = `progress-fill ${obtenerClaseEstado(fe, 0.9, 0.5, true)}`;
     }
 
@@ -91,9 +101,9 @@
       const relayId = estado?.diseno?.relay || 'ninguno';
       const relayObj = data.relays?.[relayId] || { cobertura: 0.40, cob: 0.40 };
       const cobVal = Number(relayObj.cobertura ?? relayObj.cob ?? 0.40);
-      const pctComms = Math.round(cobVal * 100);
+      const pctComms = Number(cobVal * 100).toFixed(1);
       elCommsVal.textContent = `${pctComms}%`;
-      elCommsBar.style.width = `${pctComms}%`;
+      elCommsBar.style.width = `${Math.round(cobVal * 100)}%`;
       elCommsBar.className = `progress-fill ${obtenerClaseEstado(cobVal, 0.65, 0.45, true)}`;
     }
 
@@ -168,6 +178,8 @@
       window.FlightScene.iniciar();
     } else if (nombreEscena === 'rover' && window.RoverScene?.iniciar) {
       window.RoverScene.iniciar();
+    } else if (nombreEscena === 'celebration' && window.CelebrationScene?.iniciar) {
+      window.CelebrationScene.iniciar();
     } else if (nombreEscena === 'report' && window.ReportScene?.iniciar) {
       window.ReportScene.iniciar();
     }

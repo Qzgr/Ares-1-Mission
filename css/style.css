@@ -1,152 +1,273 @@
 /* =====================================================================
-   Misión Ares-I – css/style.css
-   Consola retro 16-bit NASA / Terraria
+   Misión Ares-I – css/style.css  (VERSIÓN 2: pantalla ancha + paleta NASA)
+   Consola retro 16-bit · Blanco / Rojo / Azul NASA · Marcos dorados pixel-art
+   Paleta: #090D16 · #F8FAFC · #0B3D91 · #FC3D21 · #EAB308
    ===================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
 /* ─────────────────────────── Variables ─────────────────────────── */
 :root {
-  --nasa-blue:        #123985;
-  --nasa-blue-dark:   #0b2254;
-  --nasa-blue-light:  #1d4ed8;
-  --nasa-red:         #dc2626;
-  --nasa-red-dark:    #7f1d1d;
-  --nasa-red-light:   #f87171;
-  --gold-main:        #eab308;
-  --gold-light:       #fef08a;
-  --gold-dark:        #854d0e;
-  --pixel-black:      #090d16;
-  --steel-bg:         #1e293b;
-  --ok-green:         #16a34a;
-  --warn-amber:       #d97706;
+  --space-bg: #0B0F17;
+  --nasa-blue: #0B3D91;
+  --nasa-blue-dark: #061a40;
+  --nasa-blue-light: #1d4ed8;
+  --nasa-red: #FC3D21;
+  --nasa-red-dark: #b91c1c;
+  --nasa-red-light: #ff7b67;
+  --space-white: #F8FAFC;
+  --paper-red: #FFF1F2;
+  --text-dark: #090D16;
+  --gold-main: #EAB308;
+  --gold-light: #fef08a;
+  --gold-dark: #854d0e;
+  --pixel-black: #090D16;
+  --steel-bg: #1e293b;
+  --ok-green: #16a34a;
+  --warn-amber: #d97706;
+  --stage-max: 1600px;
 }
 
 /* ─────────────────────────── Reset ─────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; image-rendering: pixelated; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  image-rendering: pixelated;
+}
 
 body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
-  background-color: #080c18;
+  background-color: #04060e;
   background-image:
-    radial-gradient(#ffffff 1px, transparent 1px),
-    radial-gradient(#93c5fd 1px, transparent 1px),
-    linear-gradient(180deg, #070b14 0%, #101b33 65%, #3b1710 100%);
-  background-size: 90px 90px, 140px 140px, 100% 100%;
-  background-position: 0 0, 45px 60px, 0 0;
-  color: #f8fafc;
+    radial-gradient(circle at 50% 35%, #0c1c3d 0%, rgba(7, 14, 30, 0.95) 55%, #04060e 100%),
+    radial-gradient(circle at 80% 20%, rgba(29, 78, 216, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 20% 80%, rgba(252, 61, 33, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(4, 6, 14, 0.85) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: var(--space-white);
   font-family: 'VT323', monospace;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.35;
+  overflow-x: hidden;
+}
+
+/* ─────────────────── Capa de Partículas Cósmicas (Segundo Plano) ─────────────────── */
+#capa-cosmos {
+  position: fixed;
+  inset: 0;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  display: block;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
 }
 
 /* ─────────────────── Tipografía ─────────────────── */
-h1, h2, h3, .pixel-title, .stat-value, button {
+h1,
+h2,
+h3,
+.pixel-title,
+.stat-value,
+button {
   font-family: 'Press Start 2P', monospace;
   text-shadow: 2px 2px 0px var(--pixel-black);
 }
-h1 { font-size: 1.1rem;  color: #facc15; letter-spacing: 1px; margin: 8px 0 12px; }
-h2 { font-size: 0.85rem; color: #fde047; margin: 0 0 10px; }
-h3 { font-size: 0.72rem; color: #ffffff;  margin: 0 0 8px; }
 
-/* ─────────────────── Marco NASA dorado ─────────────────── */
+h1 {
+  font-size: 1.3rem;
+  color: var(--gold-light);
+  letter-spacing: 1px;
+  margin: 8px 0 12px;
+  line-height: 1.4;
+}
+
+h2 {
+  font-size: 1rem;
+  color: #fde047;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+h3 {
+  font-size: 0.8rem;
+  color: #ffffff;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+p,
+span,
+div,
+td,
+li {
+  text-shadow: none;
+}
+
+/* ─────────────────── Marco NASA: ancho completo, filete dorado, remaches ───────────────────
+   Ocupa casi todo el ancho de la pantalla para que el juego sea el protagonista. */
 .marco-nasa,
-section.escena.activa > div:first-child,
-.panel, .modal-content, .scene-container,
-.security-panel, .report-card {
+section.escena.activa>div:first-child,
+.panel,
+.modal-content,
+.scene-container,
+#taller-wrapper {
+  width: 96vw;
+  max-width: 1600px;
+  margin: 12px auto;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
   background-color: var(--nasa-blue);
+  /* 4 remaches cuadrados dorados en las esquinas */
   background-image:
-    linear-gradient(var(--gold-light), var(--gold-main)),
-    linear-gradient(var(--gold-light), var(--gold-main)),
-    linear-gradient(var(--gold-light), var(--gold-main)),
-    linear-gradient(var(--gold-light), var(--gold-main)),
-    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size:
-    10px 10px, 10px 10px, 10px 10px, 10px 10px,
-    16px 16px, 16px 16px;
+    linear-gradient(var(--gold-main), var(--gold-main)),
+    linear-gradient(var(--gold-main), var(--gold-main)),
+    linear-gradient(var(--gold-main), var(--gold-main)),
+    linear-gradient(var(--gold-main), var(--gold-main));
+  background-size: 10px 10px;
+  background-repeat: no-repeat;
   background-position:
-    6px 6px, calc(100% - 6px) 6px,
-    6px calc(100% - 6px), calc(100% - 6px) calc(100% - 6px),
-    0 0, 0 0;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
+    6px 6px,
+    calc(100% - 6px) 6px,
+    6px calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px);
   border: 4px solid var(--gold-main);
   outline: 3px solid var(--pixel-black);
   box-shadow:
-    inset 3px 3px 0px var(--gold-light),
-    inset -3px -3px 0px var(--gold-dark),
-    0 8px 0px rgba(9,13,22,0.85);
+    inset 3px 3px 0px rgba(255, 255, 255, 0.08),
+    inset -3px -3px 0px rgba(0, 0, 0, 0.3),
+    0 6px 0px rgba(9, 13, 22, 0.85);
   border-radius: 0;
-  padding: 18px;
-  margin: 12px auto;
-  max-width: 1180px;
-  position: relative;
 }
 
 /* ─────────────────── Barra HUD superior ─────────────────── */
-header, #hud, .hud-bar, .top-bar,
+header,
+#hud,
+.hud-bar,
+.top-bar,
 .barra-recursos-fija {
-  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   border-bottom: 4px solid var(--pixel-black);
-  box-shadow: inset 0 3px 0 #64748b, 0 4px 0 rgba(0,0,0,0.6);
+  box-shadow: inset 0 2px 0 #334155, 0 4px 0 rgba(0, 0, 0, 0.6);
   padding: 10px 14px;
   position: sticky;
-  top: 0; z-index: 100;
+  top: 0;
+  z-index: 100;
 }
 
 .recursos-grid,
-.hud-grid, .stats-container, #hud-stats {
+.hud-grid,
+.stats-container,
+#hud-stats {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  max-width: 1280px;
+  gap: 10px;
+  max-width: var(--stage-max);
   margin: 0 auto;
 }
 
 .recurso-card,
-.hud-item, .stat-card, .resource-box {
-  background-color: #0f2557;
+.hud-item,
+.stat-card,
+.resource-box {
+  background-color: var(--nasa-blue-dark);
   border: 2px solid var(--gold-main);
   outline: 2px solid var(--pixel-black);
-  box-shadow: inset 2px 2px 0 var(--gold-light), inset -2px -2px 0 var(--gold-dark);
-  padding: 6px 8px;
+  box-shadow: inset 2px 2px 0 rgba(234, 179, 8, 0.25), inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.recurso-header { display: flex; flex-direction: column; gap: 3px; }
+.recurso-header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
 
-.recurso-label, .hud-label, .stat-label {
+.recurso-label,
+.hud-label,
+.stat-label {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
-  color: #facc15;
+  font-size: 0.56rem;
+  color: var(--gold-light);
   text-shadow: 1px 1px 0 var(--pixel-black);
   margin-bottom: 3px;
 }
 
-.recurso-valor, .hud-val, .stat-value {
+.recurso-valor,
+.hud-val,
+.stat-value {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   color: #ffffff;
   text-shadow: 1px 1px 0 var(--pixel-black);
 }
 
 .hud-objetivo {
   position: relative;
-  padding: 5px 12px;
-  background: #0b2254;
-  border-bottom: 2px solid #ca8a04;
+  padding: 6px 16px;
+  background: var(--nasa-blue-dark);
+  border-bottom: 2px solid var(--gold-main);
   color: #fde047;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.48rem;
-  text-align: center;
+  font-size: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   text-shadow: 1px 1px 0 var(--pixel-black);
 }
 
+.btn-audio-toggle {
+  background: #090d16;
+  color: #fde047;
+  border: 2px solid #eab308;
+  box-shadow: 0 2px 0 var(--pixel-black);
+  padding: 4px 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  transition: transform 0.1s steps(2), background-color 0.1s, border-color 0.1s;
+}
+
+.btn-audio-toggle:hover {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #fde047;
+  transform: translateY(-1px);
+}
+
+.btn-audio-toggle.muted {
+  color: #94a3b8;
+  border-color: #64748b;
+  background: #0f172a;
+}
+
 /* Barras de progreso segmentadas */
-.progress-track, progress, .bar-track, .progress-bar {
-  width: 100%; height: 10px;
+.progress-track,
+progress,
+.bar-track,
+.progress-bar {
+  width: 100%;
+  height: 12px;
   background-color: var(--pixel-black);
   border: 2px solid #475569;
   margin-top: 5px;
@@ -154,58 +275,180 @@ header, #hud, .hud-bar, .top-bar,
   appearance: none;
 }
 
-.progress-fill, .bar-fill {
+.progress-fill,
+.bar-fill {
   height: 100%;
   background: repeating-linear-gradient(90deg,
-    #22c55e, #22c55e 6px, #15803d 6px, #15803d 8px);
+      #22c55e, #22c55e 6px, #15803d 6px, #15803d 8px);
   transition: width 0.25s steps(8);
 }
-.progress-fill.warning, .bar-fill.warn {
+
+.progress-fill.warning,
+.bar-fill.warn {
   background: repeating-linear-gradient(90deg, #f59e0b, #f59e0b 6px, #b45309 6px, #b45309 8px);
 }
-.progress-fill.danger, .bar-fill.danger {
+
+.progress-fill.danger,
+.bar-fill.danger {
   background: repeating-linear-gradient(90deg, #ef4444, #ef4444 6px, #991b1b 6px, #991b1b 8px);
 }
 
-/* ─────────────────── Tarjetas de piezas ─────────────────── */
-.cards-grid, .options-grid, .opciones-grid,
-.grid-4, .grid-3 {
+/* ─────────────────── Rejillas de tarjetas ───────────────────
+   .cards-grid SIEMPRE son 3 columnas iguales (decisiones, piezas). */
+.cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.options-grid,
+.opciones-grid,
+.grid-4,
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
   gap: 12px;
   margin-top: 10px;
 }
 
-.card, .option-card, .pieza-card, .decision-card,
-.opcion-card, .checkbox-card {
-  background-color: #0d2863;
-  border: 3px solid #ca8a04;
-  outline: 2px solid var(--pixel-black);
-  box-shadow: inset 2px 2px 0 #3b82f6, inset -2px -2px 0 #061230;
-  padding: 12px;
+#grid-instrumentos.opciones-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+/* ─────────────────── Tarjetas BLANCO NASA (piezas, opciones, decisiones) ─────────────────── */
+.card,
+.option-card,
+.pieza-card,
+.decision-card {
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--nasa-blue);
+  box-shadow: 0 3px 0 var(--pixel-black);
+  padding: 14px;
   cursor: pointer;
-  transition: transform 0.1s steps(2), border-color 0.1s;
+  transition: transform 0.1s steps(2), border-color 0.1s, background-color 0.1s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.opcion-card {
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--nasa-blue);
+  box-shadow: 0 3px 0 var(--pixel-black);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: transform 0.1s steps(2), border-color 0.1s, background-color 0.1s;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  border-radius: 2px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
-.card:hover, .option-card:hover, .pieza-card:hover,
-.decision-card:hover, .opcion-card:hover, .checkbox-card:hover {
-  background-color: #173f94;
-  border-color: #fef08a;
+.checkbox-card {
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--nasa-blue);
+  box-shadow: 0 3px 0 var(--pixel-black);
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: transform 0.1s steps(2), border-color 0.1s, background-color 0.1s;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border-radius: 2px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.checkbox-card input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--nasa-red);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.card:hover,
+.option-card:hover,
+.pieza-card:hover,
+.decision-card:hover,
+.opcion-card:hover,
+.checkbox-card:hover,
+.card.selected,
+.option-card.selected,
+.pieza-card.selected,
+.decision-card.selected,
+.opcion-card.selected,
+.opcion-card.seleccionada,
+.checkbox-card.selected,
+.checkbox-card.seleccionada,
+.card.activa,
+.pieza-card.activa,
+.decision-card.activa {
+  background-color: var(--paper-red);
+  border-color: var(--nasa-red);
+  box-shadow: 0 3px 0 var(--pixel-black);
+}
+
+.card:hover,
+.option-card:hover,
+.pieza-card:hover,
+.decision-card:hover,
+.opcion-card:hover,
+.checkbox-card:hover {
   transform: translateY(-2px);
 }
 
-.card.selected, .option-card.selected,
-.opcion-card.selected, .opcion-card.seleccionada,
-.checkbox-card.selected, .checkbox-card.seleccionada,
-.card.activa {
-  background-color: #1d4ed8;
-  border: 4px solid #facc15;
-  box-shadow: inset 2px 2px 0 #fef08a, inset -2px -2px 0 #854d0e,
-              0 0 0 2px var(--pixel-black);
+/* Texto interno nítido, nunca borroso ni duplicado */
+.card h1,
+.card h2,
+.card h3,
+.option-card h2,
+.pieza-card h2,
+.pieza-card h3,
+.decision-card h2,
+.decision-card h3,
+.opcion-card h2,
+.checkbox-card h2 {
+  color: var(--nasa-blue);
+  text-shadow: none;
+}
+
+.card.selected h2,
+.opcion-card.selected h2,
+.decision-card:hover h2,
+.pieza-card.selected h2,
+.decision-card.selected h2 {
+  color: var(--nasa-red);
+}
+
+.card p,
+.card span,
+.card li,
+.decision-card p,
+.decision-card span,
+.decision-card li,
+.pieza-card p,
+.pieza-card span {
+  color: var(--text-dark);
+  text-shadow: none;
 }
 
 .disabled-card {
@@ -213,49 +456,147 @@ header, #hud, .hud-bar, .top-bar,
   cursor: not-allowed;
   pointer-events: none;
 }
-.bloqueada { opacity: 0.4; cursor: not-allowed; }
+
+.bloqueada {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .opcion-top {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
+.opcion-top input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--nasa-red);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+
 .opcion-nombre {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
-  color: #fde047;
-  text-shadow: 1px 1px 0 var(--pixel-black);
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: var(--nasa-blue);
+  text-shadow: none;
   flex: 1;
+  line-height: 1.35;
+  letter-spacing: 0.2px;
 }
-.opcion-specs { font-family: 'VT323', monospace; font-size: 18px; }
+
+.card.selected .opcion-nombre,
+.opcion-card.selected .opcion-nombre,
+.opcion-card.seleccionada .opcion-nombre,
+.opcion-card:hover .opcion-nombre,
+.pieza-card.selected .opcion-nombre {
+  color: var(--nasa-red);
+}
+
+.opcion-specs {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 4px;
+}
+
 .spec-line {
   display: flex;
   justify-content: space-between;
-  gap: 4px;
-  color: #94a3b8;
+  align-items: baseline;
+  gap: 6px;
+  color: #1e293b;
+  font-size: 24px;
+  line-height: 1.15;
 }
-.spec-val { color: #fff; }
 
-.checkbox-info { flex: 1; }
+.spec-val {
+  color: #0b3d91;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.opcion-card.selected .spec-val {
+  color: var(--nasa-red);
+}
+
+.checkbox-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .checkbox-nombre {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
-  color: #fde047;
+  font-size: 0.82rem;
+  font-weight: bold;
+  color: var(--nasa-blue);
+  text-shadow: none;
+  line-height: 1.35;
+  letter-spacing: 0.2px;
+}
+
+.checkbox-card.selected .checkbox-nombre,
+.checkbox-card.seleccionada .checkbox-nombre,
+.checkbox-card:hover .checkbox-nombre {
+  color: var(--nasa-red);
+}
+
+.checkbox-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.badge-micro {
+  background: #f1f5f9;
+  border: 1.5px solid #0284c7;
+  padding: 2px 7px;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  font-weight: bold;
+  color: #0369a1;
+  border-radius: 2px;
+  line-height: 1.1;
+}
+
+.badge-micro.badge-ciencia {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #16a34a;
+}
+
+.decision-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.56rem;
+  color: #ffffff;
+  background: var(--nasa-red);
+  border: 2px solid var(--pixel-black);
+  padding: 4px 8px;
+  text-shadow: none;
+  display: inline-block;
+  align-self: flex-start;
   margin-bottom: 4px;
 }
-.checkbox-detalles { display: flex; flex-wrap: wrap; gap: 4px; }
-.badge-micro {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid #475569;
-  padding: 2px 5px;
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  color: #94a3b8;
+
+/* Botón de acción al pie de una tarjeta de decisión */
+.decision-card>button {
+  margin-top: auto;
+  width: 100%;
 }
 
 /* ─────────────────── Botones chunky retro ─────────────────── */
-button, .btn {
-  background-color: var(--nasa-blue-light, #1d4ed8);
+button,
+.btn {
+  background-color: var(--nasa-blue-light);
   color: #ffffff;
   border: 3px solid var(--gold-main);
   outline: 2px solid var(--pixel-black);
@@ -263,39 +604,129 @@ button, .btn {
     inset 2px 2px 0 #60a5fa,
     inset -2px -2px 0 #1e3a8a,
     0 4px 0 var(--pixel-black);
-  padding: 10px 14px;
-  font-size: 0.65rem;
+  padding: 12px 16px;
+  font-size: 0.7rem;
+  line-height: 1.4;
   cursor: pointer;
   text-transform: uppercase;
   transition: transform 0.08s steps(2);
 }
 
-button:hover:not(:disabled), .btn:hover:not(:disabled) {
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
   background-color: #2563eb;
-  border-color: #fef08a;
+  border-color: var(--gold-light);
 }
 
-button:active:not(:disabled), .btn:active:not(:disabled) {
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow: inset 2px 2px 0 #1e3a8a, 0 1px 0 var(--pixel-black);
 }
 
-/* Botón rojo principal */
-button.btn-launch, button.btn-primary, button.btn-danger,
-#btn-lanzar, #btn-lanzar-mision {
+/* ─────────────────── Insignias de fase y alertas: ROJO NASA + texto blanco ─────────────────── */
+.badge-tag,
+.fase-badge,
+.escena-header .badge-tag,
+.reporte-badge-rango {
+  display: inline-block;
   background-color: var(--nasa-red);
-  border: 3px solid #facc15;
+  color: #FFFFFF;
+  border: 3px solid var(--pixel-black);
+  box-shadow: 3px 3px 0 var(--pixel-black);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  padding: 7px 14px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 var(--pixel-black);
+}
+
+/* Cabecera compacta de escena: insignia + título en una sola línea (deja espacio al juego) */
+.escena-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.escena-cabecera h1,
+.escena-cabecera h2 {
+  margin: 0;
+}
+
+.escena-cabecera .badge-tag,
+.escena-cabecera .fase-badge {
+  margin-bottom: 0;
+}
+
+/* Botón rojo principal */
+button.btn-launch,
+button.btn-primary,
+button.btn-danger,
+button.btn-nasa-rojo,
+#btn-lanzar,
+#btn-lanzar-mision,
+#btn-edl-brake,
+#btn-rover-finish,
+#btn-ver-informe,
+#btn-continuar-celebracion,
+.btn-redisenar,
+.btn-accion-principal,
+#btn-mantener-empuje {
+  background-color: var(--nasa-red);
+  color: #ffffff;
+  border: 3px solid var(--pixel-black);
+  outline: 3px solid var(--gold-main);
   box-shadow:
     inset 3px 3px 0 var(--nasa-red-light),
     inset -3px -3px 0 var(--nasa-red-dark),
     0 5px 0 var(--pixel-black);
-  font-size: 0.75rem;
-  padding: 12px 20px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.78rem;
+  padding: 14px 22px;
+  text-shadow: 2px 2px 0 var(--pixel-black);
+  cursor: pointer;
+  letter-spacing: 0.5px;
 }
-button.btn-launch:hover:not(:disabled),
-#btn-lanzar:hover:not(:disabled) { background-color: #ef4444; }
 
-button:disabled, .btn:disabled {
+button.btn-launch:hover:not(:disabled),
+button.btn-primary:hover:not(:disabled),
+button.btn-nasa-rojo:hover:not(:disabled),
+#btn-lanzar:hover:not(:disabled),
+#btn-edl-brake:hover:not(:disabled),
+#btn-rover-finish:hover:not(:disabled),
+#btn-ver-informe:hover:not(:disabled),
+#btn-continuar-celebracion:hover:not(:disabled),
+#btn-mantener-empuje:hover:not(:disabled),
+.btn-redisenar:hover:not(:disabled) {
+  background-color: #ff5238;
+  border-color: var(--pixel-black);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 3px 3px 0 #ffa091,
+    inset -3px -3px 0 #b91c1c,
+    0 7px 0 var(--pixel-black);
+}
+
+button.btn-launch:active:not(:disabled),
+button.btn-primary:active:not(:disabled),
+button.btn-nasa-rojo:active:not(:disabled),
+#btn-lanzar:active:not(:disabled),
+#btn-edl-brake:active:not(:disabled),
+#btn-rover-finish:active:not(:disabled),
+#btn-ver-informe:active:not(:disabled),
+#btn-continuar-celebracion:active:not(:disabled),
+#btn-mantener-empuje:active:not(:disabled),
+.btn-redisenar:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: inset 2px 2px 0 #991b1b, 0 2px 0 var(--pixel-black);
+}
+
+button:disabled,
+.btn:disabled {
   background-color: #334155;
   border-color: #64748b;
   color: #94a3b8;
@@ -304,32 +735,58 @@ button:disabled, .btn:disabled {
   opacity: 0.7;
 }
 
+/* Botón secundario (abandonar tramos) */
+.btn-secondary,
+#btn-abandonar-edl,
+#btn-rover-abandon,
+#btn-abandonar-lanzamiento,
+#btn-abandonar-tramo-flight {
+  background-color: #1e293b;
+  color: #f87171;
+  border: 3px solid #991b1b;
+  outline: 2px solid var(--pixel-black);
+  box-shadow: inset 2px 2px 0 #334155, inset -2px -2px 0 #0f172a, 0 3px 0 var(--pixel-black);
+}
+
+.btn-secondary:hover:not(:disabled),
+#btn-abandonar-edl:hover:not(:disabled),
+#btn-rover-abandon:hover:not(:disabled),
+#btn-abandonar-lanzamiento:hover:not(:disabled),
+#btn-abandonar-tramo-flight:hover:not(:disabled) {
+  background-color: #7f1d1d;
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
 /* ─────────────────── Pasos de ensamblaje ─────────────────── */
 .pasos-ensamblaje {
   display: flex;
   justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
 .paso-pill {
-  flex: 1; min-width: 120px;
+  flex: 1;
+  min-width: 140px;
   text-align: center;
-  padding: 8px 4px;
-  background: var(--nasa-blue-dark, #0b2254);
-  border: 2px solid #475569;
+  padding: 10px 6px;
+  background: var(--nasa-blue-dark);
+  border: 3px solid #475569;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.52rem;
-  color: #94a3b8;
+  font-size: 0.6rem;
+  color: #cbd5e1;
   cursor: default;
 }
 
 .paso-pill.activo {
-  background: #1d4ed8;
-  border: 3px solid #facc15;
-  color: #fef08a;
-  box-shadow: 0 3px 0 var(--pixel-black);
+  background-color: var(--space-white);
+  border: 4px solid var(--nasa-red);
+  color: var(--text-dark);
+  box-shadow: 0 4px 0 var(--pixel-black);
+  font-weight: bold;
+  text-shadow: none;
 }
 
 .paso-pill.completado {
@@ -338,234 +795,1231 @@ button:disabled, .btn:disabled {
   color: #bbf7d0;
 }
 
-.paso-seccion { margin-top: 10px; }
+.paso-seccion {
+  margin-top: 10px;
+}
+
 .paso-nav {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 18px;
   flex-wrap: wrap;
 }
 
-/* ─────────────────── Canvas ─────────────────── */
-canvas {
+/* ─────────────────── Canvas: escalado nítido (pixel-perfect) ─────────────────── */
+canvas,
+.arcade-canvas,
+#canvas-lanzamiento,
+#canvas-flight,
+#canvas-edl,
+#canvas-jezero,
+#canvas-ascent,
+#canvas-cinematica,
+#canvas-amerizaje,
+#canvas-celebracion {
+  width: 100% !important;
+  max-width: 1200px !important;
+  height: auto !important;
   display: block;
-  margin: 0 auto 12px auto;
-  border: 4px solid var(--gold-main);
-  outline: 3px solid var(--pixel-black);
-  background-color: #070b14;
-  max-width: 100%;
+  margin: 0 auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
-/* ─────────────────── Semáforo de seguridad ─────────────────── */
+/* Excepción: canvas de partículas de fondo espacial completo */
+canvas#capa-cosmos,
+#capa-cosmos {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  display: block !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* ─────────────────── Layouts de consola: panel lateral + canvas gigante ─────────────────── */
+.console-split {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.console-split-right {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 20px;
+  align-items: center;
+}
+
+.console-split canvas,
+.console-split-right canvas {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.console-split>*,
+.console-split-right>* {
+  min-width: 0;
+}
+
+/* Panel lateral de medidores y controles */
+.panel-consola {
+  background-color: var(--nasa-blue-dark);
+  border: 3px solid var(--gold-main);
+  outline: 3px solid var(--pixel-black);
+  box-shadow: inset 2px 2px 0 rgba(234, 179, 8, 0.2), inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel-consola .panel-titulo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.66rem;
+  color: var(--gold-light);
+  border-bottom: 2px solid var(--gold-main);
+  padding-bottom: 8px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.panel-consola button {
+  width: 100%;
+}
+
+.dato-grande {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.82rem;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.dato-grande small {
+  display: block;
+  font-size: 0.55rem;
+  color: var(--gold-light);
+}
+
+.dato-grande.peligro {
+  color: #f87171;
+}
+
+.dato-grande.ok {
+  color: #4ade80;
+}
+
+/* Medidor vertical (altitud / velocidad / empuje) */
+.medidor-vertical {
+  position: relative;
+  width: 70px;
+  height: 230px;
+  margin: 0 auto;
+  background: var(--pixel-black);
+  border: 3px solid #475569;
+  outline: 2px solid var(--gold-main);
+}
+
+.medidor-vertical .zona-peligro,
+.medidor-vertical .zona-precaucion,
+.medidor-vertical .zona-segura {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+.medidor-vertical .zona-peligro {
+  top: 0;
+  height: 35%;
+  background: #dc2626;
+}
+
+.medidor-vertical .zona-precaucion {
+  top: 35%;
+  height: 30%;
+  background: #eab308;
+}
+
+.medidor-vertical .zona-segura {
+  top: 65%;
+  height: 35%;
+  background: #16a34a;
+}
+
+.medidor-vertical .aguja {
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  height: 8px;
+  background: #ffffff;
+  border: 2px solid var(--pixel-black);
+  transition: top 0.1s linear;
+}
+
+.medidor-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: repeating-linear-gradient(0deg, #22c55e, #22c55e 6px, #15803d 6px, #15803d 8px);
+}
+
+/* Barra superior compacta dentro de minijuegos */
+.minijuego-barra-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.minijuego-info-left {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  color: #fde047;
+}
+
+/* Tránsito espacial: canvas grande + panel de controles a la derecha */
+.flight-game-layout {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 20px;
+  align-items: start;
+}
+
+.flight-game-layout .canvas-wrapper {
+  min-width: 0;
+}
+
+.flight-game-layout canvas {
+  max-width: none;
+  margin: 0;
+}
+
+.panel-controles-vuelo {
+  background-color: var(--nasa-blue-dark);
+  border: 3px solid var(--gold-main);
+  outline: 3px solid var(--pixel-black);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─────────────────── Panel de Revisión de Seguridad / Semáforo ─────────────────── */
+.security-panel,
+.panel-seguridad,
 .semaforo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-  margin: 10px 0;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 14px 0;
 }
 
 .sem-item {
-  background: #0b2254;
-  border: 2px solid #475569;
-  padding: 10px;
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 4px solid var(--nasa-blue);
+  box-shadow: 0 4px 0 var(--pixel-black);
+  padding: 14px;
+  transition: transform 0.1s steps(2);
 }
-.sem-item.verde   { border-color: #22c55e; box-shadow: inset 3px 0 0 #22c55e; }
-.sem-item.amarillo{ border-color: #facc15; box-shadow: inset 3px 0 0 #facc15; }
-.sem-item.rojo    { border-color: #ef4444; box-shadow: inset 3px 0 0 #ef4444; background: #450a0a; }
+
+.sem-item:hover {
+  border-color: var(--nasa-red);
+  background-color: var(--paper-red);
+}
 
 .sem-label {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
-  color: #facc15;
-  margin-bottom: 4px;
+  font-size: 0.58rem;
+  color: var(--text-dark);
+  text-shadow: none;
+  font-weight: bold;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
-.sem-valor { font-family: 'VT323', monospace; font-size: 20px; color: #fff; }
-.sem-msg   { font-family: 'VT323', monospace; font-size: 17px; color: #94a3b8; }
+
+.sem-valor {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  color: var(--text-dark);
+  text-shadow: none;
+  font-weight: bold;
+}
+
+.sem-msg {
+  font-family: 'VT323', monospace;
+  font-size: 21px;
+  color: #334155;
+  text-shadow: none;
+}
+
+.sem-item.verde {
+  border-color: var(--ok-green);
+  box-shadow: inset 6px 0 0 var(--ok-green), 0 4px 0 var(--pixel-black);
+}
+
+.sem-item.verde .sem-label {
+  color: #14532d;
+}
+
+.sem-item.verde .sem-valor {
+  color: #15803d;
+}
+
+.sem-item.verde .sem-msg {
+  color: #166534;
+}
+
+.sem-item.amarillo {
+  border-color: var(--warn-amber);
+  box-shadow: inset 6px 0 0 var(--warn-amber), 0 4px 0 var(--pixel-black);
+}
+
+.sem-item.amarillo .sem-label {
+  color: #78350f;
+}
+
+.sem-item.amarillo .sem-valor {
+  color: #b45309;
+}
+
+.sem-item.amarillo .sem-msg {
+  color: #92400e;
+}
+
+.sem-item.rojo {
+  background-color: #fee2e2;
+  border-color: var(--nasa-red);
+  box-shadow: inset 6px 0 0 var(--nasa-red), 0 4px 0 var(--pixel-black);
+}
+
+.sem-item.rojo .sem-label {
+  color: #991b1b;
+}
+
+.sem-item.rojo .sem-valor {
+  color: var(--nasa-red);
+}
+
+.sem-item.rojo .sem-msg {
+  color: #b91c1c;
+}
 
 /* ─────────────────── Tooltips educativos ─────────────────── */
-[data-tooltip] { position: relative; }
+[data-tooltip] {
+  position: relative;
+}
+
 [data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: 105%; left: 50%;
+  bottom: 105%;
+  left: 50%;
   transform: translateX(-50%);
-  width: 240px;
+  width: 260px;
   background: var(--pixel-black);
-  color: #fef08a;
+  color: var(--gold-light);
   border: 2px solid var(--gold-main);
   padding: 8px;
   font-family: 'VT323', monospace;
-  font-size: 18px;
+  font-size: 20px;
   z-index: 200;
   pointer-events: none;
   box-shadow: 0 4px 0 #000;
   white-space: normal;
 }
 
-/* ─────────────────── Efectos de tormenta ─────────────────── */
+/* ─────────────────── Alertas y efectos de tormenta ─────────────────── */
 .alerta-tormenta {
   animation: parpadeoRojo 0.6s steps(2) infinite;
 }
+
 @keyframes parpadeoRojo {
-  0%, 100% { border-color: #ef4444; }
-  50%       { border-color: #fef08a; }
+
+  0%,
+  100% {
+    border-color: #ef4444;
+  }
+
+  50% {
+    border-color: var(--gold-light);
+  }
 }
 
 .tormenta-polvo {
-  box-shadow: inset 0 0 120px rgba(154,52,18,0.92);
+  box-shadow: inset 0 0 120px rgba(154, 52, 18, 0.92);
+}
+
+/* Banner rojo NASA de la Decisión 2 (y otras alertas críticas) */
+.banner-alerta {
+  background: var(--nasa-red);
+  color: #ffffff;
+  border: 4px solid var(--pixel-black);
+  outline: 3px solid var(--gold-main);
+  box-shadow: 0 5px 0 var(--pixel-black);
+  padding: 16px 22px;
+  margin-bottom: 18px;
+  text-align: left;
+  animation: parpadeoBanner 1.2s steps(2) infinite;
+}
+
+.banner-alerta h1,
+.banner-alerta h2 {
+  color: #ffffff;
+  text-shadow: 2px 2px 0 var(--pixel-black);
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+
+.banner-alerta p {
+  color: #ffffff;
+  font-size: 1.4rem;
+  margin: 0 0 10px;
+  text-shadow: none;
+}
+
+@keyframes parpadeoBanner {
+
+  0%,
+  100% {
+    background-color: var(--nasa-red);
+  }
+
+  50% {
+    background-color: #e0321a;
+  }
+}
+
+.insignias-estado {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.insignia {
+  background: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--pixel-black);
+  padding: 7px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.56rem;
+  text-shadow: none;
+}
+
+.insignia.ok {
+  border-left: 8px solid var(--ok-green);
+}
+
+.insignia.no {
+  border-left: 8px solid var(--nasa-red);
 }
 
 /* ─────────────────── Touch controles rover ─────────────────── */
 .touch-controles {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 6px;
+  margin-top: 8px;
 }
+
 .touch-btn {
   background: #1e293b;
-  border: 2px solid var(--gold-main);
-  color: #facc15;
-  padding: 10px 16px;
+  border: 3px solid var(--gold-main);
+  color: var(--gold-light);
+  padding: 12px 18px;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
-  min-width: 60px;
+  font-size: 0.64rem;
+  min-width: 70px;
 }
-.touch-btn:active { transform: translateY(2px); }
+
+.touch-btn:active {
+  transform: translateY(2px);
+}
 
 /* ─────────────────── Escenas ─────────────────── */
-section.escena { display: none; }
-section.escena.activa { display: block; }
+section.escena {
+  display: none;
+}
+
+section.escena.activa {
+  display: block;
+}
 
 /* ─────────────────── Briefing inicial ─────────────────── */
 .briefing-panel {
-  max-width: 900px;
+  max-width: var(--stage-max);
   text-align: center;
 }
-.briefing-tripulacion { margin: 20px auto; }
-.briefing-tripulacion p { margin: 8px 0; }
-.briefing-caption { color: #bae6fd; }
+
+.briefing-tripulacion {
+  margin: 20px auto;
+}
+
+.briefing-tripulacion p {
+  margin: 8px 0;
+}
+
+.briefing-caption {
+  color: #e2e8f0;
+}
+
 .briefing-kicker {
-  color: #7dd3fc;
+  color: var(--gold-light);
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   letter-spacing: 1px;
 }
+
 .briefing-intro {
-  max-width: 720px;
+  max-width: 980px;
   margin: 0 auto 20px;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
 }
+
 .briefing-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
   margin: 18px 0;
   text-align: left;
 }
+
 .briefing-option {
   width: 100%;
-  min-height: 110px;
-  padding: 14px;
-  background: #0d2863;
-  border-color: #ca8a04;
+  min-height: 120px;
+  padding: 16px;
+  background: var(--space-white);
+  color: var(--text-dark);
+  border: 4px solid var(--nasa-blue);
+  outline: none;
+  box-shadow: 0 4px 0 var(--pixel-black);
   text-align: left;
   text-transform: none;
   line-height: 1.4;
+  text-shadow: none;
 }
+
+.briefing-option:hover:not(:disabled),
 .briefing-option[aria-pressed="true"] {
-  background: #1d4ed8;
-  border-color: #fef08a;
-  box-shadow: inset 2px 2px 0 #fef08a, inset -2px -2px 0 #854d0e,
-              0 0 0 2px var(--pixel-black);
+  background-color: var(--paper-red);
+  color: var(--text-dark);
+  border-color: var(--nasa-red);
+  box-shadow: 0 4px 0 var(--pixel-black);
 }
+
 .briefing-option strong {
   display: block;
   margin-bottom: 8px;
-  color: #fde047;
+  color: var(--nasa-blue);
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
+  font-size: 0.68rem;
+  text-shadow: none;
 }
+
+.briefing-option[aria-pressed="true"] strong,
+.briefing-option:hover strong {
+  color: var(--nasa-red);
+}
+
 .briefing-option span {
   display: block;
-  color: #e2e8f0;
+  color: var(--text-dark);
   font-family: 'VT323', monospace;
-  font-size: 1.15rem;
+  font-size: 1.3rem;
+  text-shadow: none;
 }
+
 .briefing-option .briefing-bonus {
   margin-top: 8px;
-  color: #7dd3fc;
+  color: #334155;
 }
+
 .briefing-budget {
   margin: 20px auto;
-  padding: 12px;
-  border: 2px solid #38bdf8;
-  background: rgba(3, 105, 161, 0.22);
+  padding: 14px;
+  border: 3px solid var(--gold-main);
+  background: rgba(6, 26, 64, 0.6);
 }
-.briefing-budget strong { color: #7dd3fc; }
-.briefing-acciones { margin-top: 20px; }
 
-.fase-lanzamiento, .fase-edl {
-  max-width: 900px;
-  text-align: center;
+.briefing-budget strong {
+  color: var(--gold-light);
 }
-.lanzamiento-hud, .edl-hud {
+
+.briefing-acciones {
+  margin-top: 20px;
+}
+
+/* ─────────────────── Fases de lanzamiento y descenso (ancho completo) ─────────────────── */
+.fase-lanzamiento,
+.fase-edl {
+  max-width: var(--stage-max);
+  text-align: left;
+}
+
+.marco-nasa h1,
+.marco-nasa h2,
+.marco-nasa h3,
+.marco-nasa p {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.marco-nasa>p,
+.marco-nasa>div>p {
+  text-align: left;
+  padding: 0 4px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.lanzamiento-hud,
+.edl-hud,
+.rover-hud {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 12px 24px;
-  margin: 14px 0;
+  gap: 12px 28px;
+  margin: 12px 0;
   color: #fde047;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.58rem;
+  font-size: 0.68rem;
 }
+
 .lanzamiento-medidor {
   position: relative;
-  width: min(100%, 640px);
-  height: 22px;
+  width: min(100%, 900px);
+  height: 26px;
   margin: 14px auto;
-  border: 3px solid #090d16;
+  border: 3px solid var(--pixel-black);
   background: #7f1d1d;
 }
+
 .lanzamiento-zona-verde {
   position: absolute;
   left: 60%;
   width: 25%;
   height: 100%;
-  background: #16a34a;
+  background: var(--ok-green);
 }
+
 .lanzamiento-aguja {
   position: absolute;
   top: -5px;
   left: 50%;
-  height: 26px;
+  height: 36px;
   width: 4px;
   background: #fff;
-  border: 1px solid #090d16;
+  border: 1px solid var(--pixel-black);
   transform: translateX(-50%);
 }
-#btn-mantener-empuje, #btn-edl-brake {
+
+#btn-mantener-empuje,
+#btn-edl-brake {
   touch-action: none;
   user-select: none;
 }
+
 .edl-result {
   min-height: 1.4em;
   margin-top: 8px;
   color: #fde047;
-  font-size: 1.15rem;
+  font-size: 1.3rem;
 }
 
-/* ─────────────────── Responsivo ─────────────────── */
-@media (max-width: 820px) {
-  .recursos-grid,
-  .hud-grid { grid-template-columns: repeat(2, 1fr); }
-  h1 { font-size: 0.85rem; }
-  h2 { font-size: 0.72rem; }
-  .opciones-grid, .cards-grid {
+/* ─────────────────── Pantalla de Reporte Final ─────────────────── */
+.reporte-container {
+  max-width: var(--stage-max);
+  margin: 0 auto;
+}
+
+/* Banner de rango: alto contraste */
+.reporte-hero {
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 5px solid var(--nasa-red);
+  outline: 3px solid var(--pixel-black);
+  padding: 22px;
+  text-align: center;
+  margin: 14px 0 20px;
+  box-shadow: 0 6px 0 var(--pixel-black);
+}
+
+.reporte-hero h1,
+.reporte-hero h2 {
+  text-shadow: none;
+  color: var(--text-dark);
+}
+
+.reporte-hero.historica {
+  border-color: var(--gold-main);
+  background-color: #FEF9C3;
+}
+
+.reporte-hero.exito {
+  border-color: var(--ok-green);
+  background-color: #DCFCE7;
+}
+
+.reporte-hero.parcial {
+  border-color: var(--warn-amber);
+  background-color: #FEF3C7;
+}
+
+.reporte-hero.perdida {
+  border-color: #dc2626;
+  background-color: #7F1D1D;
+  color: var(--gold-light);
+}
+
+.reporte-hero.perdida h1,
+.reporte-hero.perdida .reporte-titular-rango {
+  color: var(--gold-light);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.reporte-hero.perdida .reporte-score-numero {
+  color: var(--gold-light);
+  text-shadow: none;
+}
+
+.reporte-hero.perdida .reporte-desc-rango {
+  color: #fecaca;
+}
+
+.reporte-titular-rango {
+  font-size: 1.5rem;
+  color: var(--nasa-red);
+  margin: 10px 0;
+  text-shadow: none;
+}
+
+.reporte-score-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.reporte-score-numero {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 3rem;
+  color: var(--text-dark);
+  text-shadow: none;
+}
+
+.reporte-score-max {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.1rem;
+  color: #475569;
+}
+
+.reporte-desc-rango {
+  font-size: 1.4rem;
+  color: #1e293b;
+  margin: 8px 0 0;
+}
+
+/* Epílogo: regreso a la Tierra */
+.epilogo-regreso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--space-white);
+  color: var(--text-dark);
+  border: 4px solid var(--nasa-blue);
+  outline: 3px solid var(--gold-main);
+  box-shadow: 0 5px 0 var(--pixel-black);
+  padding: 14px 20px;
+  margin: 16px 0;
+  font-size: 1.5rem;
+  text-shadow: none;
+}
+
+.badge-perfecto {
+  background: var(--nasa-red);
+  color: #ffffff;
+  border: 3px solid var(--pixel-black);
+  box-shadow: 3px 3px 0 var(--pixel-black);
+  padding: 8px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  text-shadow: 1px 1px 0 var(--pixel-black);
+}
+
+/* Penalización alerta */
+.reporte-alerta-penalizacion {
+  background: rgba(220, 38, 38, 0.2);
+  border: 3px solid #ef4444;
+  padding: 14px 18px;
+  margin: 16px 0;
+  color: #fecaca;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.reporte-grid-analisis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.reporte-card {
+  background-color: var(--nasa-blue);
+  border: 3px solid var(--pixel-black);
+  outline: 3px solid var(--gold-main);
+  padding: 18px;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.06), inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+  min-width: 0;
+}
+
+.card-titulo {
+  color: #fde047;
+  font-size: 0.82rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--gold-main);
+  padding-bottom: 8px;
+}
+
+/* Gráfico Radar SVG: etiquetas sin corte */
+.radar-wrapper {
+  overflow: visible;
+  padding: 24px;
+}
+
+.radar-svg {
+  overflow: visible;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+/* Tabla de puntuación: blanco NASA con texto negro */
+.reporte-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--pixel-black);
+}
+
+.reporte-tabla th {
+  background: var(--nasa-blue-dark);
+  color: #fde047;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 3px solid var(--gold-main);
+}
+
+.reporte-tabla td {
+  padding: 10px;
+  border-bottom: 2px solid #cbd5e1;
+  font-size: 1.15rem;
+  color: var(--text-dark);
+}
+
+.reporte-tabla tr:last-child td {
+  border-bottom: none;
+  font-weight: bold;
+}
+
+.score-pill {
+  display: inline-block;
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--nasa-red);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  padding: 5px 9px;
+  font-weight: bold;
+}
+
+/* Timeline causa-efecto */
+.timeline-causa-efecto {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-nodo {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  background: rgba(6, 26, 64, 0.85);
+  border: 2px solid var(--gold-main);
+  padding: 14px;
+}
+
+.nodo-indicador {
+  width: 36px;
+  height: 36px;
+  background-color: var(--space-white);
+  color: var(--text-dark);
+  border: 3px solid var(--nasa-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.nodo-etapa {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.66rem;
+  color: var(--gold-light);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.nodo-eleccion {
+  color: #fde047;
+  font-size: 1.2rem;
+  margin-bottom: 3px;
+}
+
+.nodo-consecuencia {
+  color: #fca5a5;
+  font-size: 1.15rem;
+  margin-bottom: 3px;
+}
+
+.nodo-explicacion {
+  color: #cbd5e1;
+  font-size: 1.1rem;
+}
+
+.seccion-sub {
+  color: #e2e8f0;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+/* Glosario */
+.etiquetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.etiqueta-card {
+  background: rgba(6, 26, 64, 0.85);
+  border: 2px solid var(--gold-main);
+  padding: 12px;
+}
+
+.etiqueta-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.etiqueta-punto {
+  width: 10px;
+  height: 10px;
+  background: var(--nasa-red);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.etiqueta-nombre {
+  color: var(--gold-light);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+}
+
+.etiqueta-texto {
+  color: #f1f5f9;
+  font-size: 1.1rem;
+  margin-top: 6px;
+}
+
+.reporte-acciones {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.btn-share {
+  background: var(--nasa-blue);
+  color: #fff;
+  border: 2px solid var(--gold-main);
+  font-size: 0.68rem;
+  padding: 10px 16px;
+}
+
+.btn-accion {
+  font-family: 'Press Start 2P', monospace;
+}
+
+.btn-reiniciar {
+  background: var(--nasa-blue-light);
+}
+
+/* ─────────────────── Pantallas medianas (≤1100px) ─────────────────── */
+@media (max-width: 1100px) {
+  .console-split {
+    grid-template-columns: 240px 1fr;
+  }
+
+  .console-split-right {
+    grid-template-columns: 1fr 240px;
+  }
+
+  .flight-game-layout {
+    grid-template-columns: 1fr 240px;
+  }
+
+  .reporte-grid-analisis {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ─────────────────── Responsivo para Celulares y Tablets (≤820px) ─────────────────── */
+@media (max-width: 820px) {
+  body {
+    font-size: 19px;
+  }
+
+  .marco-nasa,
+  section.escena.activa>div:first-child,
+  .panel,
+  .modal-content,
+  .scene-container {
+    width: 98vw;
+    padding: 12px;
+    margin: 8px auto;
+  }
+
+  .recursos-grid,
+  .hud-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  h1 {
+    font-size: 0.9rem;
+    margin: 6px 0 10px;
+  }
+
+  h2 {
+    font-size: 0.74rem;
+  }
+
+  h3 {
+    font-size: 0.66rem;
+  }
+
+  .opciones-grid,
+  .cards-grid,
+  .options-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Los layouts de 2 columnas pasan a una sola columna */
+  .console-split,
+  .console-split-right,
+  .flight-game-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pasos-ensamblaje {
+    gap: 4px;
+  }
+
+  .paso-pill {
+    min-width: 65px;
+    font-size: 0.46rem;
+    padding: 6px 2px;
+  }
+
+  /* 1. Lanzamiento en celular */
+  .fase-lanzamiento {
+    padding: 10px;
+  }
+
+  .lanzamiento-hud {
+    font-size: 0.62rem;
+    gap: 8px 14px;
+  }
+
+  #btn-mantener-empuje {
+    width: 100% !important;
+    min-height: 58px !important;
+    font-size: 0.82rem !important;
+    padding: 16px 20px !important;
+    margin-bottom: 8px;
+    touch-action: manipulation;
+  }
+
+  #btn-abandonar-lanzamiento {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 2. Tránsito espacial en celular */
+  .canvas-wrapper {
+    max-width: 100% !important;
+  }
+
+  .panel-controles-vuelo {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 12px !important;
+  }
+
+  .minijuego-barra-superior {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .minijuego-info-left {
+    justify-content: space-around;
+  }
+
+  #btn-abandonar-tramo-flight {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 3. Descenso EDL y amerizaje en celular */
+  .fase-edl {
+    padding: 10px;
+  }
+
+  .edl-hud {
+    font-size: 0.62rem;
+    gap: 6px 12px;
+  }
+
+  #btn-edl-brake {
+    width: 100% !important;
+    min-height: 60px !important;
+    font-size: 0.85rem !important;
+    padding: 16px 20px !important;
+    touch-action: manipulation;
+  }
+
+  #btn-abandonar-edl {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .medidor-vertical {
+    height: 140px;
+  }
+
+  /* 4. Rover en celular */
+  .rover-hud {
+    font-size: 0.62rem;
+    gap: 6px 12px;
+  }
+
+  .touch-controles {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+
+  .touch-controles #rover-scan {
+    grid-column: span 2;
+  }
+
+  .touch-controles #rover-extract {
+    grid-column: span 1;
+  }
+
+  .touch-btn {
+    min-height: 52px !important;
+    padding: 12px 6px !important;
+    font-size: 0.68rem !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+
+  /* Reporte */
+  .radar-wrapper {
+    padding: 10px;
+    overflow: visible;
+  }
+
+  .radar-svg {
+    overflow: visible;
+  }
+
+  .reporte-grid-analisis {
+    grid-template-columns: 1fr;
+  }
+
+  .reporte-score-numero {
+    font-size: 2rem;
+  }
+
+  /* Botones globales en celular */
+  .paso-nav {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .paso-nav button,
+  #btn-rover-finish,
+  #btn-rover-abandon,
+  .briefing-acciones button {
+    width: 100% !important;
+    min-height: 52px !important;
+    font-size: 0.75rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .decision-card {
+    padding: 14px 16px;
+  }
+
+  .decision-card h2 {
+    font-size: 0.68rem;
+    line-height: 1.5;
   }
 }

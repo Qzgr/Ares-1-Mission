@@ -165,6 +165,7 @@
           opcion.setAttribute('aria-pressed', String(opcion === boton));
         });
         actualizarConfiguracion(window.estadoMision);
+        window.Sound?.playSelect?.();
       });
     });
 
@@ -178,10 +179,12 @@
           opcion.setAttribute('aria-pressed', String(opcion === boton));
         });
         actualizarConfiguracion(window.estadoMision);
+        window.Sound?.playSelect?.();
       });
     });
 
     container.querySelector('#btn-briefing-iniciar')?.addEventListener('click', () => {
+      window.Sound?.playStepNext?.();
       actualizarConfiguracion(window.estadoMision);
       window.UI?.cambiarEscena('design');
     });

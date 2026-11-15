@@ -117,10 +117,10 @@
           <div class="checkbox-info">
             <div class="checkbox-nombre">${inst.nombre}</div>
             <div class="checkbox-detalles">
-              <span class="badge-micro">Ciencia: +${inst.ciencia} pts</span>
-              <span class="badge-micro">${inst.consumoW} W</span>
-              <span class="badge-micro">${inst.masa} kg</span>
-              <span class="badge-micro">${inst.costo} M$</span>
+              <span class="badge-micro badge-ciencia">🔬 Ciencia: +${inst.ciencia} pts</span>
+              <span class="badge-micro">⚡ ${inst.consumoW} W</span>
+              <span class="badge-micro">⚖️ ${inst.masa} kg</span>
+              <span class="badge-micro">💰 ${inst.costo} M$</span>
             </div>
           </div>
         </label>`;
@@ -176,10 +176,10 @@
     <h3>🛡️ Protecciones</h3>
     <div class="opciones-grid">
       ${checkCard('blindaje', 'Blindaje Antirradiación',
-          '<span class="badge-micro">15 kg</span><span class="badge-micro">12 M$</span>',
+          '<span class="badge-micro">⚖️ 15 kg</span><span class="badge-micro">💰 12 M$</span>',
           TOOLTIPS.blindaje)}
       ${checkCard('redundancia', 'Kit de Redundancia',
-          '<span class="badge-micro">10 kg</span><span class="badge-micro">10 M$</span><span class="badge-micro">+1 m</span>',
+          '<span class="badge-micro">⚖️ 10 kg</span><span class="badge-micro">💰 10 M$</span><span class="badge-micro">⏳ +1 m</span>',
           TOOLTIPS.redundancia)}
     </div>
 
@@ -450,12 +450,12 @@
     const d = estado.diseno;
 
     // Navegación de pasos
-    document.getElementById('btn-p1-next')?.addEventListener('click', () => irPaso(2));
-    document.getElementById('btn-p2-back')?.addEventListener('click', () => irPaso(1));
-    document.getElementById('btn-p2-next')?.addEventListener('click', () => irPaso(3));
-    document.getElementById('btn-p3-back')?.addEventListener('click', () => irPaso(2));
-    document.getElementById('btn-p3-next')?.addEventListener('click', () => irPaso(4));
-    document.getElementById('btn-p4-back')?.addEventListener('click', () => irPaso(3));
+    document.getElementById('btn-p1-next')?.addEventListener('click', () => { irPaso(2); window.Sound?.playStepNext?.(); });
+    document.getElementById('btn-p2-back')?.addEventListener('click', () => { irPaso(1); window.Sound?.playStepBack?.(); });
+    document.getElementById('btn-p2-next')?.addEventListener('click', () => { irPaso(3); window.Sound?.playStepNext?.(); });
+    document.getElementById('btn-p3-back')?.addEventListener('click', () => { irPaso(2); window.Sound?.playStepBack?.(); });
+    document.getElementById('btn-p3-next')?.addEventListener('click', () => { irPaso(4); window.Sound?.playStepNext?.(); });
+    document.getElementById('btn-p4-back')?.addEventListener('click', () => { irPaso(3); window.Sound?.playStepBack?.(); });
 
     // Radios
     ['cohete','panel','bateria','antena','relay'].forEach(cat => {
@@ -465,7 +465,7 @@
             d[cat] = inp.value;
             refrescarEstiloRadio('radio-' + cat);
             evaluarYActualizarUI();
-            if (window.Sound?.playBeep) window.Sound.playBeep();
+            if (window.Sound?.playSelect) window.Sound.playSelect();
           }
         });
         inp.closest('.opcion-card')?.addEventListener('click', e => {
@@ -482,7 +482,11 @@
         d[id] = chk.checked;
         document.getElementById('card-' + id)?.classList.toggle('selected', chk.checked);
         evaluarYActualizarUI();
-        if (window.Sound?.playBeep) window.Sound.playBeep();
+        if (chk.checked) {
+          window.Sound?.playSelect ? window.Sound.playSelect() : window.Sound?.playBeep?.();
+        } else {
+          window.Sound?.playDeselect ? window.Sound.playDeselect() : window.Sound?.playBeep?.();
+        }
       });
     });
 
@@ -493,12 +497,17 @@
         d.instrumentos = sel;
         document.getElementById('card-inst-' + chk.value)?.classList.toggle('selected', chk.checked);
         evaluarYActualizarUI();
-        if (window.Sound?.playBeep) window.Sound.playBeep();
+        if (chk.checked) {
+          window.Sound?.playSelect ? window.Sound.playSelect() : window.Sound?.playBeep?.();
+        } else {
+          window.Sound?.playDeselect ? window.Sound.playDeselect() : window.Sound?.playBeep?.();
+        }
       });
     });
 
     // Lanzar misión
     document.getElementById('btn-lanzar')?.addEventListener('click', () => {
+      if (window.Sound?.playLaunch) window.Sound.playLaunch();
       const res = estado.evaluacionActual || window.Engine.evaluarDiseno(d, estado.presupuestoMax);
       estado.evaluacionActual = res;
       estado.evaluacion = res;
