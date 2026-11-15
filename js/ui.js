@@ -74,11 +74,11 @@
       elEnergiaBar.className = `progress-fill ${obtenerClaseEstado(fe, 0.9, 0.5, true)}`;
     }
 
-    // 4. Datos (datosGenerados / capacidadTx UD)
+    // 4. Capacidad de transmisión / datos generados (UD)
     const elDatosVal = document.getElementById('res-datos-val');
     const elDatosBar = document.getElementById('res-datos-bar');
     if (elDatosVal && elDatosBar) {
-      elDatosVal.textContent = `${metricas.datosGenerados} / ${metricas.capacidadTx} UD`;
+      elDatosVal.textContent = `${metricas.capacidadTx} / ${metricas.datosGenerados} UD`;
       const pctDatos = metricas.datosGenerados === 0 ? 100 : Math.min(100, Math.round(metricas.datosEntregados * 100));
       elDatosBar.style.width = `${pctDatos}%`;
       elDatosBar.className = `progress-fill ${obtenerClaseEstado(metricas.datosEntregados, 0.99, 0.70, true)}`;
@@ -105,6 +105,18 @@
       elTiempoVal.textContent = `${metricas.meses} / ${ventanaMeses} m`;
       elTiempoBar.style.width = `${pctTiempo}%`;
       elTiempoBar.className = `progress-fill ${obtenerClaseEstado(metricas.meses, 25, ventanaMeses)}`;
+    }
+  }
+
+  function actualizarObjetivoActivo(objetivo) {
+    const nombres = {
+      agua: 'Buscar agua antigua',
+      mapeo: 'Mapear el cráter',
+      economica: 'Misión económica'
+    };
+    const elObjetivo = document.getElementById('hud-objetivo-activo');
+    if (elObjetivo) {
+      elObjetivo.textContent = `Objetivo: ${nombres[objetivo] || nombres.agua}`;
     }
   }
 
@@ -163,6 +175,7 @@
 
   window.UI = {
     actualizarBarraRecursos,
+    actualizarObjetivoActivo,
     limpiarBarraRecursos,
     cambiarEscena
   };

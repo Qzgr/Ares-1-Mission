@@ -132,6 +132,18 @@ header, #hud, .hud-bar, .top-bar,
   text-shadow: 1px 1px 0 var(--pixel-black);
 }
 
+.hud-objetivo {
+  position: relative;
+  padding: 5px 12px;
+  background: #0b2254;
+  border-bottom: 2px solid #ca8a04;
+  color: #fde047;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.48rem;
+  text-align: center;
+  text-shadow: 1px 1px 0 var(--pixel-black);
+}
+
 /* Barras de progreso segmentadas */
 .progress-track, progress, .bar-track, .progress-bar {
   width: 100%; height: 10px;
@@ -434,6 +446,9 @@ section.escena.activa { display: block; }
   max-width: 900px;
   text-align: center;
 }
+.briefing-tripulacion { margin: 20px auto; }
+.briefing-tripulacion p { margin: 8px 0; }
+.briefing-caption { color: #bae6fd; }
 .briefing-kicker {
   color: #7dd3fc;
   font-family: 'Press Start 2P', monospace;
@@ -445,16 +460,16 @@ section.escena.activa { display: block; }
   margin: 0 auto 20px;
   font-size: 1.25rem;
 }
-.briefing-objectives {
+.briefing-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
   margin: 18px 0;
   text-align: left;
 }
-.briefing-objective {
+.briefing-option {
   width: 100%;
-  min-height: 150px;
+  min-height: 110px;
   padding: 14px;
   background: #0d2863;
   border-color: #ca8a04;
@@ -462,32 +477,36 @@ section.escena.activa { display: block; }
   text-transform: none;
   line-height: 1.4;
 }
-.briefing-objective[aria-pressed="true"] {
+.briefing-option[aria-pressed="true"] {
   background: #1d4ed8;
   border-color: #fef08a;
   box-shadow: inset 2px 2px 0 #fef08a, inset -2px -2px 0 #854d0e,
               0 0 0 2px var(--pixel-black);
 }
-.briefing-objective strong {
+.briefing-option strong {
   display: block;
   margin-bottom: 8px;
   color: #fde047;
   font-family: 'Press Start 2P', monospace;
   font-size: 0.6rem;
 }
-.briefing-objective span {
+.briefing-option span {
   display: block;
   color: #e2e8f0;
   font-family: 'VT323', monospace;
   font-size: 1.15rem;
 }
-.briefing-objetivo-activo {
+.briefing-option .briefing-bonus {
+  margin-top: 8px;
+  color: #7dd3fc;
+}
+.briefing-budget {
   margin: 20px auto;
   padding: 12px;
   border: 2px solid #38bdf8;
   background: rgba(3, 105, 161, 0.22);
 }
-.briefing-objetivo-activo strong { color: #7dd3fc; }
+.briefing-budget strong { color: #7dd3fc; }
 .briefing-acciones { margin-top: 20px; }
 
 /* ─────────────────── Responsivo ─────────────────── */

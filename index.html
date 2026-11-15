@@ -43,9 +43,9 @@
         </div>
       </div>
 
-      <div class="recurso-card" id="card-res-datos" title="Datos generados / capacidad de transmisión">
+      <div class="recurso-card" id="card-res-datos" title="Capacidad de transmisión / datos generados">
         <div class="recurso-header">
-          <span class="recurso-label">📡 Datos / TX</span>
+          <span class="recurso-label">📡 TX / Datos</span>
           <span class="recurso-valor" id="res-datos-val">-- / -- UD</span>
         </div>
         <div class="progress-track">
@@ -74,6 +74,9 @@
       </div>
     </div>
   </header>
+  <div class="hud-objetivo" aria-live="polite">
+    <span id="hud-objetivo-activo">Objetivo: Buscar agua antigua</span>
+  </div>
 
   <!-- CONTENEDOR PRINCIPAL DE ESCENAS -->
   <main class="app-main" id="app-main">
@@ -101,9 +104,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.UI?.cambiarEscena) {
-        window.UI.cambiarEscena('briefing');
-      }
+      window.BriefingScene?.iniciar();
     });
   </script>
 </body>

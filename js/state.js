@@ -37,6 +37,8 @@
       danoPaneles: 0,
       datosTransito: 0,
       muestrasRecolectadas: 0,
+      edlPrecision: 0,
+      lanzamientoBonus: 0,
       decision2: null,
       decision3: null,
       eventosOcurridos: [],
@@ -120,14 +122,18 @@
     });
     Object.assign(disenoActual, disenoInicial);
 
-    eventosActuales.splice(0, eventosActuales.length, ...(overrides.eventosOcurridos || []));
-    historialActual.splice(0, historialActual.length, ...(overrides.historialCausaEfecto || []));
-
     Object.assign(estado, fresh, overrides, {
       diseno: disenoActual,
       eventosOcurridos: eventosActuales,
-      historialCausaEfecto: historialActual
+      historialCausaEfecto: historialActual,
+      muestrasRecolectadas: 0,
+      edlPrecision: 0,
+      lanzamientoBonus: 0,
+      decision2: null,
+      decision3: null
     });
+    eventosActuales.length = 0;
+    historialActual.length = 0;
     return estado;
   }
 
